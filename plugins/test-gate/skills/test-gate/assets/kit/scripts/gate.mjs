@@ -220,6 +220,10 @@ async function main() {
       env.PORT = String(port);
       // With PLAYWRIGHT_BASE_URL set Playwright would skip its web server and hit whatever is already there.
       delete env.PLAYWRIGHT_BASE_URL;
+      // The e2e config template reads the server command from here (kit.config.json e2e.serverCommand).
+      if (typeof e2eCfg.serverCommand === 'string' && !e2eCfg.serverCommand.includes('<') && !env.E2E_SERVER_COMMAND) {
+        env.E2E_SERVER_COMMAND = e2eCfg.serverCommand;
+      }
       console.log(`gate: e2e uses port ${port}`);
       if (typeof e2eCfg.buildIdFile === 'string') {
         const { freshness, id } = checkBuildFreshness({ root, buildIdFile: e2eCfg.buildIdFile, sourceDirs: [] });

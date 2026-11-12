@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: quality-2
+description: "Review a passing but weak RLS test and prove each deny test can fail with a mutation."
+tags: [quality, vacuous, needs-live-stack]
+context:
+  scaffold_script: fixture.sh

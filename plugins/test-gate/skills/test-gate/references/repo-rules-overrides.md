@@ -59,6 +59,10 @@ Role or label locators, web-first assertions, POM versus fixtures criteria, data
 trace for diagnosis only, accessibility, visual regression, API tests, third-party mocks.
 ```
 
+## Enforcement
+
+An override that only lives in prose gets ignored under pressure. With the kit installed, `scripts/e2e-guard.mjs` turns the retries, skip, timeout and wait overrides into a check on the diff. Its exceptions are inline (`// test-guard: approved <reason>`, added in the same change) and listed in the guard section of the flaky reference. Shared helpers that hold assertions are added to `kit.config.json` `guard.extraTestFiles`; a repo's own rules file stays the place that says who may approve.
+
 ## When there is no override file
 
 Write the rule in the repo's `AGENTS.md` (short) and the reasons in a rules file. The `AGENTS.md` lines stay short; the incident table that motivated each rule lives in the longer file.

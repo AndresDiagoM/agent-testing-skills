@@ -14,9 +14,21 @@ Read 2026-11-12 from lockfiles and `package.json` (no suite was run for this tab
 | Package manager | pnpm 12.18.0 (`packageManager`) | not re-read | not re-read |
 | Node | `engines` >=26, `.nvmrc` 26 | not re-read | not re-read |
 
+## Kit templates (assets/kit/e2e and assets/kit/app)
+
+Checked 2026-11-12 in a disposable copy of project A (no server, no database, no suite run):
+
+| Check | Result |
+|---|---|
+| Type-check of all kit `.ts` and `.tsx` files with the copy's own `tsc --noEmit` (strict, `noUncheckedIndexedAccess`, `verbatimModuleSyntax`) | no errors in the kit files |
+| `playwright test --list` with a config importing `playwright.config.snippet.ts`, a `kit.config.json` with two roles and two per-spec users | 5 tests listed in 2 projects, exit 0 |
+| Versions in that copy's lockfile | Playwright 1.65.0, Next 16.4.6, React 19.3.1, TypeScript 6.0.3, `@types/node` 26.6.6 |
+
+Not checked: a real browser run of `gotoReady`, `auth.setup.ts` or `preflight.ts`, and a Next build with the app templates (the reference project's equivalent files run in its own suite).
+
 ## Which tips carry which tag
 
-- Setup project, `dependencies`, `storageState`, `channel: 'chrome'` on Windows, one worker: Playwright 1.65.0, measured in the reference project config and runs, 2026-11-12.
+- Setup project, `dependencies`, `storageState`, `channel: 'chrome'` on Windows, one worker: Playwright 1.65.0, measured in the reference project config and runs, 2026-11-12. The kit config snippet carries the same choices (see the table above).
 - Ready helper with `data-hydrated` and `data-page-ready`: Playwright 1.65.0 and Next 16.4.6, reference project.
 - Not verified here: Playwright `--repeat-each`, `--shuffle`, the `json` reporter and `--outputFile` flags; Vitest and Jest `--json` flags; every Cypress statement. Check with the installed version's `--help`.
 

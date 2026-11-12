@@ -1,9 +1,13 @@
 {
   "name": "pgtap-rls",
+  "displayName": "pgTAP RLS",
   "description": "Write, review and run pgTAP tests for Supabase/Postgres Row Level Security, grants and SQL functions, with a mutation check and machine-readable evidence.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "author": {
     "name": "AndresDiagoM"
-  }
+  },
+  "homepage": "https://github.com/AndresDiagoM/agent-testing-skills/tree/main/plugins/pgtap-rls",
+  "repository": "https://github.com/AndresDiagoM/agent-testing-skills",
+  "keywords": ["pgtap", "postgres", "supabase", "row-level-security", "rls", "sql", "testing", "agent-skill"]
 }

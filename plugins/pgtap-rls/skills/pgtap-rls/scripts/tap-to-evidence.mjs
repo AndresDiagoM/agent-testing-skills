@@ -318,7 +318,7 @@ export function buildStep({ parsed, name = 'db:test', command = '', exitCode = n
 // ------------------------------------------------------------------------------------------------ merge (test-gate rules)
 // Mirror of test-gate's gate-lib.mjs (addStep / evaluateEvidence / validateStep / applyHonesty), used when the repo has
 // no kit (scripts/gate.mjs). With the kit present, tap-to-evidence calls `gate.mjs add-step` instead. A cross-check
-// test (test/evidence-integration.test.mjs) runs both on the same inputs and compares ok/complete.
+// test (test/evidence.test.mjs) runs both on the same inputs and compares ok/complete.
 
 const STEP_NAME_RE = /^[a-z0-9:_-]+$/;
 const STATUSES = ['passed', 'failed', 'timeout', 'skipped', 'not-run'];

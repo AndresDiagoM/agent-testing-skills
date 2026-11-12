@@ -1,6 +1,0 @@
-schema_version: "1.1"
-name: quality-flaky-without-weakening
-description: A spec clicks right after goto and fails randomly; the skill should lead to the ready helper, not toPass, waitForTimeout, networkidle, first(), fixme or removed assertions.
-tags: [quality]
-context:
-  scaffold_script: fixture.sh

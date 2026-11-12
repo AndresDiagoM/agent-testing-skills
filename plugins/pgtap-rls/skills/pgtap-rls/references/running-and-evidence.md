@@ -41,7 +41,7 @@ If the repo has the `test-gate` kit (`scripts/gate.mjs` at the repo root, or `--
 ## Reading pg_prove output
 Closing line `Files=N, Tests=M, ... wallclock secs` then `Result: PASS|FAIL`. Per failure `# Failed test N: "name"`
 with `have:` and `want:` lines; `Test Summary Report` lists `Failed test:` numbers and `Parse errors:` (bad plan).
-Captured from CLI 3.1.0 (`scripts/test/fixtures/real-cli-3.1.0-*`): the CLI prints the summary on stdout and the Target
+Captured from CLI 3.1.0 (`scripts/test/fixtures/cli-*`): the CLI prints the summary on stdout and the Target
 line, psql NOTICE/ERROR lines and `error running container: exit 1` on stderr; there are no `ok N` lines and no `n/m`
 counters. A file that dies prints `Dubious, test returned 3` on its own line and `(Wstat: 768 (exited 3) ...)` in the
 summary. `supabase test db <file>` accepts a file outside `supabase/` (Windows, verified). Through plain `psql -f` the

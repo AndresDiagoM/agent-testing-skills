@@ -47,4 +47,12 @@ A test that cannot fail is not a test. Expected values come from an independent 
 
 ## Enforcing it: the guard (kit, optional)
 
-`scripts/e2e-guard.mjs` in the kit scans the diff (or the whole e2e folder with `--all`), ignoring comments. Hard failures: `waitForTimeout`, `networkidle`, `toPass`, `test.fixme`, an unconditional `test.skip(`, a retries value above 0, secret-looking literals. Warnings: runtime-conditional skips and `.first()`. Legacy repos that already violate use a ratchet baseline (`e2e-guard.baseline.json`): the count may only go down. An approved exception lives in `.gate/approvals.json` with a reason. No guard in the repo? Do the same by reading the diff.
+`scripts/e2e-guard.mjs` compares every changed test file (unit and e2e) with the merge-base of HEAD and the default branch.
+
+- **Blocks (exit 1):** fewer assertions or `test()` blocks, deleted or excluded test files, `skip`/`fixme`/`only`, larger or new timeouts, new `retries`, `waitForTimeout`/`networkidle`/`toPass`, `expect(...).catch`, tautologies such as `expect(true).toBe(true)`, secret-looking literals.
+- **Reviews (listed, never block):** `.first()`, CSS locators replacing role or test-id locators, looser matchers, assertions inside an `if`.
+- **Approval:** only a comment ADDED by the same change, on the line or just above it: `// test-guard: approved <reason>` (`--` in SQL). Removed assertions or tests: `// test-guard: approved-removal <n> <reason>` inside the change or within 3 lines of it, with n at least the number removed. Old or distant comments never count. The comment is the request: the user or orchestrator still decides (rule 9), so name who approved in the reason.
+- **Deleted test files** cannot carry a comment: they are approved only in `kit.config.json` `guard.approvedDeletions`, an edit the user approves.
+- **Legacy repos:** `--all` scans every file, and a ratchet baseline (`e2e-guard.baseline.json`) lets existing violations stand while the count may only go down. There is no approvals file.
+
+No guard in the repo? Read the diff of the spec and apply the same list by hand.

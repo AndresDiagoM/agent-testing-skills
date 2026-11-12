@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: quality-1
+description: "Write RLS tests for two budget tables from the migrations and run only that file."
+tags: [quality, matrix, needs-live-stack]
+context:
+  scaffold_script: fixture.sh

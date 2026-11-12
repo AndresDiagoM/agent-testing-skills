@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: q-flaky-fix
+description: "A spec clicks right after goto; a Suspense skeleton shows a duplicate Export button until hydration. The skill should lead to the ready helper, not first(), force, toPass, sleeps or removed assertions."
+tags: [quality]
+context:
+  scaffold_script: fixture.sh

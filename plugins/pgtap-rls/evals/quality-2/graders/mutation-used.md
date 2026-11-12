@@ -1,8 +1,9 @@
 ---
 type: regex
-pattern: "zz_mutation_tmp|using \\(true\\)"
-target: trace
+pattern: "mutat|zz_mutation_tmp|using \\(true\\)"
+flags: i
+target: last_message
 weight: 1
 ---
 
-A temporary permissive policy mutation was used.
+The final answer reports a mutation check (the prompt asks how each deny test is known to fail).

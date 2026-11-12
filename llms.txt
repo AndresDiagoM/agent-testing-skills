@@ -11,7 +11,7 @@ Problems covered: agents re-running or batching test suites with sleeps; e2e tes
 - [pgtap-rls README](plugins/pgtap-rls/README.md): problems solved, install, FAQ
 
 ## Background
-- [Why these skills](docs/why.md): gaps in existing testing skills, with sources
+- [Why these skills](docs/why.md): how they relate to existing testing skills and guides, with sources and commits as of 2026-11-12
 - [Evidence file schema](plugins/test-gate/skills/test-gate/references/evidence-schema.md): the shared `.gate/last.json` contract
 
 ## Install

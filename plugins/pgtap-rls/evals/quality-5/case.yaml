@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: quality-5
+description: "Run the DB suite once, record .gate/last.json, state what pgTAP cannot prove about real sign-in."
+tags: [quality, evidence, needs-live-stack]
+context:
+  scaffold_script: fixture.sh

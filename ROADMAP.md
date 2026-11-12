@@ -1,6 +1,6 @@
 # Roadmap
 
-## v0.1 (in progress, started 2026-11-12)
+## v0.1.0 (released 2026-11-12)
 
 **test-gate**
 - `SKILL.md` (< 5 KB, 14 rules) and the 10 references of `specs/test-gate.md` section 4.
@@ -18,34 +18,40 @@
 **Repo**
 - Discoverability in-repo parts (`specs/DISCOVERABILITY.md` phase 1).
 
-## v0.2 (planned)
+## v0.2.0 (2026-11-12)
 
 **test-gate**
-- Kit app templates: `goto-ready.ts`, `auth.setup.ts`, `playwright.config.snippet.ts`, `preflight.ts`, `app/{hydration-marker,page-ready,with-page-ready}.tsx`.
-- `e2e-changed.mjs` with `e2e-changed.map.json`.
-- Parameterised Stop hook (`hooks/stop-gate.mjs` + `settings.snippet.json`).
-- `install.mjs` for the kit (dry-run by default) and `install-global.mjs`.
-- Global install recipe: one copy in `~/.agents/skills/test-gate`, links for Claude Code and opencode, Antigravity `skills.json`, and a short pointer in each agent's global rules file. Verify each agent lists the skill in a real session.
-- Real install in a second project (WSL, Next front + NestJS back): decide the e2e command and whether `playwright.config.ts` changes (`npm run dev` + `reuseExistingServer: true`); guard baseline 87/13/77/6.
-- Tier B evals on real repos (project A B1-B3, project B).
-- The reference project's own gate scripts adopt schema v2.
-- Align `e2e-guard.mjs` with the reference project's new `pnpm test:guard`: diff against the merge-base, blocks fewer assertions/tests, removed files, `skip`/`fixme`/`only`, larger timeouts, new retries, `expect(...).catch`, tautological assertions; approvals only via `// test-guard: approved <reason>` added in the same hunk. Decide whether the kit adopts that design (diff mode + inline approvals) instead of `approvals.json`.
+- Done: kit templates (setup project, `gotoReady`, config snippet, preflight, readiness markers, health route), `e2e-changed.mjs` + map, Stop hook, `install.mjs`, `install-global.mjs`, `e2e-guard.mjs` redesigned (diff mode + in-hunk approvals, `approvals.json` removed).
+- Done: global install on the author's machine (Claude Code loads it); kit tested on scratch copies of two real projects (Windows and WSL).
 
 **pgtap-rls**
-- Done in v0.1 (2026-11-12): real CLI 3.1.0 captures, assets and recipes verified live (Postgres 17.11, pgTAP 1.3.3), `auth.uid()` source confirmed.
-- Still to verify: `client-rls.test.ts.tmpl`, Basejump notes, `--workdir`, real captures of zero-files and verbose output.
-- Quality evals Q1-Q5 need a `case.yaml` + fixture that copies `supabase/` into the eval workspace and uses the running stack.
+- Done: client template verified live, zero-files capture, `--workdir`/`--network-id` notes, quality evals Q1-Q5 runnable.
+
+**Evals**
+- Done: tags on every case, shorter paths, `q-flaky-fix` and `q-builder-brief` discriminate.
+
+## v0.3 (planned)
+
+**test-gate**
+- `q-random-login` still scores 1.00 without the skill: find a case where the obvious fix is wrong in a way the baseline misses.
+- Ratchet output: mark only the new hit, not every hit in the file whose count went up.
+- Verify that Codex, opencode and Antigravity list and use the skill in a real session.
+- Tier B evals on real repos with an agent session (run the gate, diagnose an injected flaky spec).
+- Shorten the remaining long kit paths (longest is about 85 characters).
+
+**pgtap-rls**
+- Q1 and Q2: rubric fails in both arms; decide whether the rubric is too strict. Q5: Bash fails with "Failed to create bridge sockets" in the eval sandbox; diagnose.
+- Basejump notes and verbose-output capture still unverified.
 - Test in a non-Claude agent (opencode or Codex).
-- `SKILL.md` is at 5118/5120 bytes: trim before adding anything.
+- `SKILL.md` is at 5104/5120 bytes: trim before adding anything.
 
 **Evals (both)**
-- `quality-diagnose-random-login` and `quality-flaky-without-weakening` show delta 0 (the baseline already passes): make them harder so they discriminate.
-- Add tags to pgtap-rls cases so `--tag` works.
+- Bash evals need WSL2 (no sandbox on native Windows) and must run one at a time.
 
 **Evidence schema**
 - Decide the `scope: files` rule: the kit applies it only to required steps; the spec said it always forces `complete:false`.
-- The honesty rule rejects `passed` with a non-zero exit, which a mutation step hits; pgtap-rls works around it (`kind: custom`, real exit in `details`). Consider a first-class mutation step kind.
+- A first-class mutation step kind (today pgtap-rls uses `kind: custom` with the real exit code in `details`).
 
 **Repo**
-- Publish to GitHub, `npx skills` check, Anthropic directory submission (METODOLOGIA phases 3-5).
-- Discoverability phases 2-3 (`specs/DISCOVERABILITY.md`).
+- Anthropic directory submission (the author submits in the portal).
+- Discoverability phases 2-3.

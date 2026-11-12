@@ -1,6 +1,0 @@
-schema_version: "1.1"
-name: quality-supervise-runaway-gate
-description: A gate agent has run 55 minutes with batches and sleeps; the skill should lead to reading running.json and the log, stopping only the recorded process, and fixing the cause.
-tags: [quality]
-context:
-  scaffold_script: fixture.sh

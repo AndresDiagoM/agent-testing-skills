@@ -9,22 +9,14 @@ The app exposes two attributes on `<html>`:
 - `data-hydrated="true"`: React hydrated the ROOT only.
 - `data-page-ready="<pathname>"`: the page body (inside its Suspense boundary) hydrated and its effects ran. It carries the path so a redirect waits for the page it landed on.
 
-Tests navigate through one helper that waits for both. Generous timeout (45 s): it only costs time when something is wrong, and Windows needs the margin. (verified against Playwright 1.65.0 and Next 16.4.6, 2026-11-12: the reference project's `gotoReady`.)
+Tests navigate through one helper that waits for both. Generous timeout (45 s, `E2E_READY_TIMEOUT_MS`): it only costs time when something is wrong, and Windows needs the margin. (verified against Playwright 1.65.0 and Next 16.4.6, 2026-11-12: the kit templates type-check in a copy of the reference project, whose own `gotoReady` they derive from.)
 
-```ts
-// e2e/fixtures.ts (sketch)
-export async function gotoReady(page: Page, url: string) {
-  await page.goto(url);
-  await page.locator('html[data-hydrated="true"]').waitFor({ state: 'attached', timeout: 45_000 });
-  await page.waitForFunction(
-    () => document.documentElement.dataset.pageReady === window.location.pathname,
-    undefined,
-    { timeout: 45_000 },
-  );
-}
-```
+Kit templates (parameters documented at the top of each file):
+- `assets/kit/e2e/goto-ready.ts`: `gotoReady(page, url)` plus a `gotoReady` fixture. Throws a message naming the missing marker when the page never signals.
+- `assets/kit/app/hydration-marker.tsx`: client component in the root layout, sets `data-hydrated` in an effect.
+- `assets/kit/app/page-ready.tsx` and `with-page-ready.tsx`: wrap each route's default export with `withPageReady(...)`; sets `data-page-ready` to the pathname after a second commit and removes it on unmount, so client navigation shows no stale value.
 
-Next App Router templates for the two markers ship in the kit in v0.2. Meanwhile: a client component that sets the attribute in an effect (root), and one rendered last in each page that sets it after a second commit (page). The attribute is removed on unmount so client navigation shows no stale value.
+Other frameworks: implement the same two attributes (root effect; last child of each page, set after a second commit) and keep the names in sync with `E2E_HYDRATED_ATTR` and `E2E_PAGE_READY_ATTR`.
 
 ## Banned (each one hides a real problem)
 
@@ -33,7 +25,7 @@ Next App Router templates for the two markers ship in the kit in v0.2. Meanwhile
 - `toPass` to retry a UI click or assertion. It may only poll server state (a row exists, an API reports done).
 - `.first()` to escape a strict-mode error.
 
-Third-party skills teach some of these as normal; this file overrides them (see the overrides reference in SKILL.md's table).
+Third-party skills teach some of these as normal; this file overrides them (SKILL.md routing table).
 
 ## No hydration marker available
 
@@ -53,6 +45,6 @@ Wait for the request or response, or for the element the result renders. Not a f
 
 1. Was the interaction before the ready signal? Use the helper.
 2. Is the locator matching a hidden streaming copy? Scope to `main`.
-3. Does another spec write the same data? Per-spec users (see the auth reference).
-4. Is it Windows with 2+ bundled Chromium, or a stale build on the port? (servers reference).
+3. Does another spec write the same data? Give each data-writing spec its own user.
+4. Is it Windows with 2+ bundled Chromium (use `channel: 'chrome'`, one worker), or a stale build on the port?
 5. Only then read the trace. Never add a retry.

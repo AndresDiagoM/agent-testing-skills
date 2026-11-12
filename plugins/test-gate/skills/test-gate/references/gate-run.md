@@ -46,7 +46,15 @@ A script that does not exist: the step is `skipped` with the reason "no script n
 
 ## With the kit (optional, `assets/kit/`)
 
-`scripts/gate.mjs` implements all of the above in plain Node 20+ (`--dry-run` prints the plan, `add-step --from-json <file>` merges a step another tool produced). `scripts/e2e-guard.mjs` scans specs for banned moves. Install means adding files to the user's repo: tell the user the exact file list and get an OK first. The kit ships in v0.1 as core scripts only; app templates (ready helper, auth setup, stop hook, installer) ship in v0.2.
+Plain Node 20+ scripts with `--help`; settings live in `kit.config.json` at the repo root.
+
+- `scripts/gate.mjs`: everything above; `--dry-run` prints the plan, `add-step --from-json <file>` merges another tool's step.
+- `scripts/e2e-guard.mjs`: blocks weakened tests (fewer assertions, skips, bigger timeouts, new retries, sleeps) by diffing against the merge-base with the default branch. `--all` plus a ratchet baseline serves legacy repos. Run it before the gate.
+- `scripts/e2e-changed.mjs`: runs only the specs a change can affect, repeated 3 times, setup once. The mapping table is `e2e-changed.map.json`; an unmapped app file runs the whole suite and says why.
+- `hooks/stop-gate.mjs`: Claude Code Stop hook. Guard, lint, typecheck and related unit tests within 90 s. Exit 2 blocks the stop; `STOP_GATE=off` disables it. It never runs e2e, build or db tests.
+- `install.mjs --target <repo>`: dry-run by default and it prints every file. `--apply` writes new files, `--overwrite` replaces changed ones, `--with changed,hook,e2e,app` adds the optional groups (the e2e templates go in as a group, the app templates need `--app-dir`). It never edits application code or `.claude/settings.json` (that entry is only printed), and touches `package.json` or `.gitignore` only with `--patch-package-json` or `--patch-gitignore`.
+
+Installing adds files to the user's repo: tell the user the exact file list from the dry run and get an OK before `--apply`.
 
 ## Without the kit
 

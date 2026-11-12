@@ -1,0 +1,17 @@
+{
+  "$comment": "Example mapping for e2e-changed.mjs. Edit every pattern for the repo. Patterns are JavaScript regex strings matched against repo-relative posix paths; first matching route wins. A route whose specs is \"ALL\" selects the whole suite. A changed app file that matches no route and hits fullSuiteFallback also selects the whole suite (never a silent pass).",
+  "specDir": "e2e",
+  "specPattern": "\\.spec\\.[cm]?[jt]sx?$",
+  "routes": [
+    { "pattern": "^src/(components/(ui|shell|providers)|lib|hooks)/|^src/app/(layout|globals\\.css)", "specs": "ALL" },
+    { "pattern": "^src/app/(login|auth)|^src/components/auth/", "specs": ["auth.spec.ts"] },
+    { "pattern": "^src/app/dashboard/|^src/components/dashboard/", "specs": ["dashboard.spec.ts"] },
+    { "pattern": "^src/app/settings/", "specs": ["settings.spec.ts", "dashboard.spec.ts"] }
+  ],
+  "shared": "^(playwright\\.config\\.[^/]+|e2e/(?!.*\\.spec\\.[cm]?[jt]sx?$)(?!\\.auth/).+)",
+  "noEffect": "\\.(test|unit)\\.[cm]?[jt]sx?$|/__tests__/|\\.md$",
+  "fullSuiteFallback": "^(src|app|components|lib|public)/|^(package\\.json|next\\.config\\.[^/]+)$",
+  "command": "<pm> exec playwright test --workers=1 {specs}",
+  "repeat": 3,
+  "repeatEnv": "E2E_REPEAT"
+}

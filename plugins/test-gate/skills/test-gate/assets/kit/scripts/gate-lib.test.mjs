@@ -43,7 +43,7 @@ import {
   validateStep,
   zeroExitProblem,
 } from './gate-lib.mjs';
-import { judgeHits, parseAddedLines, parseGuardArgs, scanSource, stripComments } from './e2e-guard.mjs';
+import { judgeHits, parseGuardArgs, scanSource, stripComments } from './e2e-guard.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ESC = String.fromCharCode(27);
@@ -545,23 +545,20 @@ describe('e2e-guard', () => {
     assert.deepEqual(rules("const password = process.env.E2E_PASSWORD ?? 'xxxxxxxxxxx';"), []);
     assert.deepEqual(rules("const label = 'a-long-visible-label';"), []);
   });
-  it('ratchet: within baseline allowed, above baseline fails, approvals unblock, lower counts are reported', () => {
+  it('ratchet: within baseline allowed, above baseline fails, lower counts are reported, no baseline fails every hard hit', () => {
     const hit = (line) => ({ rule: 'waitForTimeout', severity: 'hard', file: 'e2e/a.spec.ts', line, text: 'await page.waitForTimeout(1)' });
     const baseline = { files: { waitForTimeout: { 'e2e/a.spec.ts': 2 } } };
-    assert.equal(judgeHits([hit(1), hit(2)], { approvals: [], baseline }).failing.length, 0);
-    assert.equal(judgeHits([hit(1), hit(2), hit(3)], { approvals: [], baseline }).failing.length, 3);
-    assert.equal(judgeHits([hit(1)], { approvals: [], baseline }).lowered.length, 1);
-    assert.equal(judgeHits([hit(1)], { approvals: [], baseline: null }).failing.length, 1);
-    const ap = { rule: 'waitForTimeout', file: 'e2e/a.spec.ts', reason: 'x', approvedBy: 'user', approvalRef: 'msg' };
-    assert.equal(judgeHits([hit(1)], { approvals: [ap], baseline: null }).failing.length, 0);
-    assert.equal(judgeHits([hit(1)], { approvals: [{ ...ap, approvedBy: 'agent' }], baseline: null }).failing.length, 1);
+    assert.equal(judgeHits([hit(1), hit(2)], { baseline }).failing.length, 0);
+    assert.equal(judgeHits([hit(1), hit(2), hit(3)], { baseline }).failing.length, 3);
+    assert.equal(judgeHits([hit(1)], { baseline }).lowered.length, 1);
+    assert.equal(judgeHits([hit(1)], { baseline: null }).failing.length, 1);
   });
-  it('diff parsing returns added line numbers per file; args are validated', () => {
-    const diff = ['--- a/e2e/a.spec.ts', '+++ b/e2e/a.spec.ts', '@@ -3,0 +4,2 @@', '+x', '+y', '@@ -9 +11 @@', '+z'].join('\n');
-    assert.deepEqual([...parseAddedLines(diff).get('e2e/a.spec.ts')], [4, 5, 11]);
+  it('args are validated', () => {
     assert.throws(() => parseGuardArgs(['--all', '--base', 'x']), /cannot be combined/);
     assert.throws(() => parseGuardArgs(['--write-baseline']), /needs --all/);
+    assert.throws(() => parseGuardArgs(['--staged', '--head', 'x']), /cannot be combined/);
     assert.equal(parseGuardArgs(['--all', '--dir', 'e2e']).dirs[0], 'e2e');
+    assert.deepEqual(parseGuardArgs(['--files', 'a.ts,b.ts']).files, ['a.ts', 'b.ts']);
   });
 });
 

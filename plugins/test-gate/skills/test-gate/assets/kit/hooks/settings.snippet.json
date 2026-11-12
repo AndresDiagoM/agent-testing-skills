@@ -1,0 +1,16 @@
+{
+  "_comment": "Merge the Stop entry into .claude/settings.json (do not replace the file). The command resolves from the project dir. timeout is in seconds and must exceed the 90 s budget in kit.config.json stopGate.budgetMs.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-gate.mjs\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

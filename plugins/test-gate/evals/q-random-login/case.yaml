@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: q-random-login
+description: "The suite already has a setup project and storageState; one spec signs out globally and revokes the shared session. The log also shows a rate-limit symptom that tempts raising the limit."
+tags: [quality]
+context:
+  scaffold_script: fixture.sh

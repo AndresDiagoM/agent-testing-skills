@@ -42,11 +42,11 @@ Without the kit there is no `running.json`: ask the agent to tee each step to a 
 
 ## Reviewer rule
 
-The agent's report is not evidence. Before accepting work the orchestrator reads the evidence file (the `complete` field, not the agent's prose), re-runs lint, typecheck and unit tests, and runs at least one full e2e itself. Read the diff of specs for weakening (subtractive-diff check in the flaky reference listed in SKILL.md).
+The agent's report is not evidence. Before accepting work the orchestrator reads the evidence file (the `complete` field, not the agent's prose), re-runs lint, typecheck and unit tests, and runs at least one full e2e itself. Read the diff of specs for weakening, or run the kit's `scripts/e2e-guard.mjs`, which blocks fewer assertions, skips, bigger timeouts, new retries and sleeps. An approval comment (`// test-guard: approved <reason>`) must be one the user or orchestrator asked for, never one the builder wrote to get past the guard.
 
 ## Builder rule
 
-Every builder runs the e2e of what it touched before reporting: only the affected specs, repeated 3 times, setup once. A repo wrapper such as the reference project's changed-specs script does this; otherwise run the affected files by name. Unmapped or shared code means the full suite, with the reason stated. A spec that was never run is not delivered.
+Every builder runs the e2e of what it touched before reporting: only the affected specs, repeated 3 times, setup once. The kit's `scripts/e2e-changed.mjs` does this (mapping in `e2e-changed.map.json`); otherwise run the affected files by name. With the kit's Stop hook (`hooks/stop-gate.mjs`) a builder is also blocked, within 90 s, on a weakened test, a lint or type error or a failing related unit test before it can stop; it never runs e2e. Unmapped or shared code means the full suite, with the reason stated. A spec that was never run is not delivered.
 
 ## Report format to demand
 

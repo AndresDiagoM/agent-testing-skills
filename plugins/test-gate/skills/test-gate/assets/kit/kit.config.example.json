@@ -12,16 +12,54 @@
   },
   "e2e": {
     "portStart": 3200,
+    "serverCommand": "<pm> run start",
+    "healthUrl": "/api/health",
     "buildIdFile": "<dir>/.next/BUILD_ID",
-    "sourceDirs": ["<dir>/app", "<dir>/components", "<dir>/public", "<dir>/next.config.ts"]
+    "sourceDirs": ["<dir>/app", "<dir>/components", "<dir>/public", "<dir>/next.config.ts"],
+    "channelOnWindows": "chrome",
+    "specUsers": ["dashboard", "settings"],
+    "authRoles": [
+      {
+        "name": "owner",
+        "loginUrl": "/login",
+        "statePath": "e2e/.auth/owner.json",
+        "emailLabel": "Email",
+        "passwordLabel": "Password",
+        "submitName": "Sign in",
+        "successUrl": "/dashboard"
+      }
+    ]
   },
+  "guard": {
+    "baseBranch": "main",
+    "extraTestFiles": ["e2e/helpers/**", "e2e/fixtures.ts"],
+    "assertionHelpers": [],
+    "arrayAssertionHelpers": [],
+    "maxNewTimeoutMs": 5000,
+    "approvedDeletions": [],
+    "testIgnore": [],
+    "dirs": ["e2e"],
+    "baseline": "e2e-guard.baseline.json"
+  },
+  "stopGate": {
+    "budgetMs": 90000,
+    "guard": true,
+    "lintChanged": true,
+    "typecheck": true,
+    "relatedTests": true,
+    "packages": []
+  },
+  "e2eChanged": { "map": "e2e-changed.map.json" },
   "evidence": { "dir": ".gate" },
   "_notes": [
-    "Placeholders in angle brackets are filled per repo. No secret values live in this file.",
+    "Placeholders in angle brackets are filled per repo; install.mjs drops keys whose value still holds an unfilled <placeholder> (it lists them). No secret values live in this file.",
     "steps.<name>: script (a package.json script) OR command (<pm> is replaced by the detected manager, '<pm> exec' by its exec form), timeoutMin, env, kind (lint|typecheck|unit|db|build|e2e|parity|custom), allowEmpty {reason}, approval {reason, approvedBy, approvalRef} (whole step skipped), approvedSkips [{test, reason, issue, approvedBy, approvalRef, approvedAt, recheckBy}].",
     "approvedBy is 'user' or 'orchestrator' quoting a standing user instruction; never the agent that wrote the skip.",
     "Unlisted steps get package.json script resolution (spec section 5). requiredSteps defaults to lint, typecheck, test, db:test, build, e2e.",
     "e2e.buildIdFile + e2e.sourceDirs enable the stale-build check when e2e runs without a build step; jsonReport: true exports PLAYWRIGHT_JSON_OUTPUT_FILE (use with a json reporter in the Playwright config or --reporter=list,json in the command).",
-    "Not read by v0.1 gate.mjs: stopGate, authRoles, healthUrl, channelOnWindows (reserved for v0.2 kit files)."
+    "e2e.serverCommand (starts the app; PORT is exported by gate.mjs and e2e-changed.mjs, install.mjs fills <pm>), specUsers, authRoles[] ({name, loginUrl, statePath?, emailLabel?, passwordLabel?, submitName?, successUrl? (regex string)}), channelOnWindows, healthUrl, buildIdFile and portStart are read by the e2e templates (assets/kit/e2e, found by walking up from the cwd or via E2E_KIT_CONFIG); e2e-changed.mjs also exports PORT, E2E_USE_BUILD and E2E_SERVER_COMMAND.",
+    "guard: read by e2e-guard.mjs. baseBranch (default: origin/main, main, origin/master, master), extraTestFiles (globs of shared helpers that hold assertions), assertionHelpers (functions that wrap assertions), approvedDeletions (the only way to approve a deleted test file; the user approves that edit), testIgnore (more globs the suite excludes; Playwright configs are read automatically), dirs and baseline (for --all with a ratchet baseline).",
+    "stopGate: read by hooks/stop-gate.mjs. Each of lintChanged, typecheck, relatedTests is true (default command for the detected package manager), false, or a command string with {files} and {pkg} placeholders. packages: workspace dir globs such as apps/* and packages/* (empty = the repo root is the only package). guard: run e2e-guard diff mode first. Never runs e2e, build or db.",
+    "Not read by gate.mjs v0.1: stopGate, guard, e2eChanged, authRoles, healthUrl, channelOnWindows."
   ]
 }

@@ -5,7 +5,7 @@ Read when starting a server, running e2e against a build, running concurrent run
 ## Free port, one server you own
 
 - Pick a free port yourself (for example `PORT=3200`, next free if taken) and pass it to both server and test runner.
-- Never rely on `reuseExistingServer` against a server you did not start: Playwright can silently reuse a stale build left by an earlier run. Set it to false. Reuse is allowed only on a port and run id that you chose.
+- Never rely on `reuseExistingServer` against a server you did not start: Playwright can silently reuse a stale build left by an earlier run. Set it to false (`playwright.config.snippet.ts` does). To test a server you started yourself, attach with `PLAYWRIGHT_BASE_URL` and let the preflight verify its build id.
 - Two runs at once need distinct ports and distinct run ids (an `E2E_RUN_ID` style variable used for users and state files).
 
 ## Verify the build you are testing
@@ -14,7 +14,8 @@ Read when starting a server, running e2e against a build, running concurrent run
 - Before the first test the runner compares it with the build id on disk (Next: `.next/BUILD_ID`). Mismatch: stop with a clear message, nothing is tested.
 - A build older than its sources is stale: rebuild, or fail. Do not test it.
 - Record `build.id`, `builtAt` and `servedId` in the evidence for e2e steps. `id` different from `servedId` makes the e2e invalid.
-- A preflight check for direct `playwright test` runs belongs in `globalSetup` as preflight only, never auth. Its kit template ships in v0.2.
+- For direct `playwright test` runs the check is `assets/kit/e2e/preflight.ts`, set as `globalSetup`: build-id check only, never auth or cleanup. It is active when `E2E_USE_BUILD=1`; the build id file and health path come from `kit.config.json` `e2e.buildIdFile` and `e2e.healthUrl` (or `E2E_BUILD_ID_FILE`, `E2E_HEALTH_URL`).
+- App side: `assets/kit/app/health-route.ts` serves `{ ok, buildId }` (no secrets, no database), and `build-id.ts` captures the id once at process start from the instrumentation hook. Capturing at start matters: a server that keeps running while a rebuild rewrites `.next/BUILD_ID` must keep reporting the build it loaded, or the check passes against a stale server.
 
 ## Process ownership
 
@@ -31,11 +32,14 @@ Read when starting a server, running e2e against a build, running concurrent run
 - Keep about 45 s for post-login navigation as margin.
 - Never weaken assertions or add retries for it.
 
+Template: `assets/kit/e2e/playwright.config.snippet.ts` implements it:
+
 ```ts
-// playwright.config.ts (excerpt)
 const channel = (process.env.E2E_BROWSER_CHANNEL ?? (process.platform === 'win32' ? 'chrome' : '')) || undefined;
-// use: { channel } on the browser projects; workers: 1 on win32
+// workers: Number(process.env.E2E_WORKERS) || (win32 ? 1 : 2); retries: 0; reuseExistingServer: false
 ```
+
+The port comes from `PORT` (or `kit.config.json` `e2e.portStart`, default 3200) and the start command from `E2E_SERVER_COMMAND` (or `e2e.serverCommand`): set it to the repo's own start script.
 
 ## WSL and Linux
 

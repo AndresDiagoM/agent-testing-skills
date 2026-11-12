@@ -7,7 +7,7 @@ Agent Skills (the open [SKILL.md](https://agentskills.io) format) that make codi
 | Problem | Skill |
 |---|---|
 | An agent runs the e2e suite again and again, or splits it into batches with `sleep` to dodge a rate limit | [test-gate](plugins/test-gate) |
-| Every e2e test logs in through the UI and hits the auth rate limit (Supabase: 30 sign-ins per 5 min) | [test-gate](plugins/test-gate) |
+| Every e2e test logs in through the UI and hits the auth rate limit (Supabase CLI local default: 30 sign-ups or sign-ins per 5 min per IP) | [test-gate](plugins/test-gate) |
 | An agent "fixes" a flaky test with retries, `test.fixme`, `skip`, a broader locator or a longer timeout | [test-gate](plugins/test-gate) |
 | Tests click before React hydration; agents reach for `networkidle` or `waitForTimeout` | [test-gate](plugins/test-gate) |
 | A subagent has been running the gate for 40 minutes and nobody checks its log | [test-gate](plugins/test-gate) |
@@ -17,7 +17,7 @@ Agent Skills (the open [SKILL.md](https://agentskills.io) format) that make codi
 | An UPDATE or DELETE denied by RLS returns no error and 0 rows, so the test passes for the wrong reason | [pgtap-rls](plugins/pgtap-rls) |
 | You want proof an RLS test can fail, and checks for `security definer` functions, `search_path` and grants | [pgtap-rls](plugins/pgtap-rls) |
 
-Why these exist and what other testing skills leave out: [docs/why.md](docs/why.md).
+Why these exist, and how they relate to other testing skills and guides (with sources and commits): [docs/why.md](docs/why.md).
 
 ## Install
 
@@ -38,8 +38,8 @@ npx skills add AndresDiagoM/agent-testing-skills --skill pgtap-rls
 
 | Skill | What it does | Version |
 |---|---|---|
-| [test-gate](plugins/test-gate) | Run and supervise quality gates (lint, typecheck, unit, DB, build, e2e) in JS/TS projects with machine-readable evidence | 0.1.0 (in progress) |
-| [pgtap-rls](plugins/pgtap-rls) | pgTAP tests for Supabase/Postgres Row Level Security, grants and SQL functions | 0.1.0 (in progress) |
+| [test-gate](plugins/test-gate) | Run and supervise quality gates (lint, typecheck, unit, DB, build, e2e) in JS/TS projects with machine-readable evidence | 0.2.0 |
+| [pgtap-rls](plugins/pgtap-rls) | pgTAP tests for Supabase/Postgres Row Level Security, grants and SQL functions | 0.2.0 |
 
 ## Contributing a skill
 

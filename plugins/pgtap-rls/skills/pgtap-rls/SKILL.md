@@ -39,6 +39,6 @@ Repo rules (AGENTS.md, `.claude/rules/*`, OVERRIDES.md) win over this skill.
 | Slow, flaky, colliding ids | `isolation-and-speed.md` |
 | Real sign-in, PostgREST, doubles | `beyond-transactions.md` |
 | Running, evidence, parsing TAP | `running-and-evidence.md` |
-| Repo overrides, Basejump | `repo-overrides-and-basejump.md` |
+| Repo overrides, Basejump | `repo-basejump.md` |
 
 Templates: `assets/` (skeleton, policy-matrix, rls-coverage, optional client test). Unverified snippets: `references/VERSIONS.md`.

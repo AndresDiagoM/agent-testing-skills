@@ -13,19 +13,19 @@ An agent skill that writes, reviews and runs pgTAP tests for Supabase/Postgres R
 - **What a pgTAP test cannot prove.** Real sign-in, PostgREST error shapes and concurrency, with a client-level test template.
 - **Record DB test results for a quality gate.** `scripts/tap-to-evidence.mjs` writes a `db:test` step (counts, failing tests, scope) into the `.gate/last.json` evidence file used by the sibling `test-gate` skill.
 
-## What existing guides leave out
+## How existing guides compare
 
-Based only on `docs/research/agent-testing-skills-critique.md` (2026-11-12, section 8 and cross-cutting gaps) from the reference project (internal, not public).
+Based on the upstream files as of 2026-11-12, at the commits listed in [docs/why.md](../../docs/why.md#sources). "Not covered" means not found in the files read at that commit. The Supabase docs and the skills named here are good starting points; `pgtap-rls` is meant to sit next to them.
 
-| Topic | What the critique found in existing guidance | What this skill provides |
+| Topic | What existing guidance covers | What this skill provides |
 |---|---|---|
-| Agent skill for pgTAP | No pgTAP skill exists. `supabase/agent-skills` has `supabase` and `supabase-postgres-best-practices`; the latter's description mentions RLS tests, but its `security-rls-basics.md` has no lines on testing, pgTAP or impersonation | A dedicated skill for tests; policy design stays with the official skills |
-| Impersonation examples | The Supabase guide uses `set local request.jwt.claim.sub`; no anon example, none for service_role, none for claims beyond `sub` or for `auth.jwt()` policies | Claims JSON per role, including `anon` and `service_role`, and a note on stale claims |
-| Silent denials | Denied UPDATE and DELETE succeed with zero rows; tests must assert it | `is_empty(... returning 1)` plus a re-read as the owner |
-| Proving a test can fail | The guide suggests a temporary permissive policy and not editing a policy to pass a test | A script that builds the mutated copy, a grant variant, and a rule to report discrepancies |
-| Basejump helpers | Community add-on; authors advise against production; installed via dbdev; pinned 0.0.6 | Documented as optional; templates do not depend on it |
-| Transaction limits | A rolled-back transaction cannot test client-library behaviour or commit-time effects | `beyond-transactions.md` and an optional client-level test template |
-| Evidence file | A machine-readable evidence file is listed as a gap nobody covers | `tap-to-evidence.mjs`, schema aligned with `test-gate` |
+| Agent skills for pgTAP | Other pgTAP skills exist, for example [`github/awesome-copilot` `supabase-rls-policies`](https://github.com/github/awesome-copilot/blob/e593e6649d/skills/supabase-rls-policies/SKILL.md) and [`nghiahsgs/taw-kit` `testing-rls-pgtap`](https://github.com/nghiahsgs/taw-kit/blob/9cfb26af52/skills/testing-rls-pgtap/SKILL.md). The official `supabase/agent-skills` skills (`supabase`, `supabase-postgres-best-practices`) mention RLS tests in a description, but their `security-rls-basics.md` has no lines on testing or pgTAP | A dedicated skill for tests, with scripts and the evidence file below; policy design stays with the official skills |
+| Impersonation examples | The Supabase docs' policy tests cover `anon` and `authenticated` and set `request.jwt.claim.sub`; they show no `service_role` or other claims | Claims JSON per role, including `anon` and `service_role`, and a note on stale claims |
+| Silent denials | The Supabase docs assert a denied UPDATE or DELETE with `is_empty(... returning 1)` and a re-read | The same pattern inside the per-table allow/deny matrix |
+| Proving a test can fail | The Supabase docs and the awesome-copilot skill suggest a temporary `using (true)` policy and not editing a policy to pass a test | A script that builds the mutated copy, a grant variant, and a rule to report discrepancies |
+| Basejump helpers | Community add-on documented in the Supabase docs (pinned `0.0.6`, installed via dbdev); its README does not recommend activating it directly in production | Documented as optional; templates do not depend on it |
+| Transaction limits | The Supabase docs show a client-level Vitest suite that mirrors the pgTAP tests, and note that application-level tests cannot use a rolled-back transaction | `beyond-transactions.md` and an optional client-level test template |
+| Evidence file | No machine-readable evidence file found in the files read | `tap-to-evidence.mjs`, schema aligned with `test-gate` |
 
 ## Install
 
