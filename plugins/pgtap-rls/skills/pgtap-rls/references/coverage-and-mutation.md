@@ -32,9 +32,20 @@ Goal: show that a deny test goes red when the protection is removed.
 5. A deny test that stays green is vacuous (no fixture row, wrong role, empty set, error swallowed by `lives_ok`).
    Fix the test and repeat. Delete the scratch copy.
 M1 means nothing on a table whose policy is already `using (true)`: use M2 or a write-side mutation.
-UPDATE and DELETE also need the row to pass the SELECT policy: if SELECT hides the victim row, `--cmd update` or
-`--cmd delete` alone leaves the deny test green (seen on a real table, 2026-11-12). Use `--cmd all` (or mutate select as
-well) for those tests.
+UPDATE and DELETE probes that read a column (`where`, `returning col`) also need the row to pass the SELECT policy:
+if SELECT hides the victim row, `--cmd update` or `--cmd delete` alone leaves such a probe green (seen on a real
+table, 2026-11-12). The unfiltered probes of `policy-matrix.md` (`update t set col = 'x' returning 1`, `delete from t
+returning 1`, the other user owning no rows) read no column, so the UPDATE-only and DELETE-only mutations turn them
+red (verified 2026-11-12, see `VERSIONS.md`; the old filtered probes stayed green under the same mutations). A
+filtered probe still needs `--cmd all` (or a select mutation too).
+
+Restrictive policies (`as restrictive`, e.g. an `aal2` check) are ANDed with the permissive ones, so the M1 mutation
+(a permissive `using (true)`) cannot flip a denial that comes from a restrictive policy. For those, edit the scratch
+copy by hand: drop the restrictive policy or change it to `using (true)`; the aal1 deny tests must go red
+(`assets/claims-aal2.test.sql`).
+
+The mutation line goes right after `plan(N)`, so the table must already exist there. A file that creates its example
+table inside the transaction (the assets here) needs the line moved after its policies when you try it.
 
 ## Never make a test pass by changing the code under test
 If a test disagrees with a migration, stop and write one line: `table.cmd, role, expected, observed, migration

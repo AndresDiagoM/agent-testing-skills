@@ -2,7 +2,7 @@
   "name": "pgtap-rls",
   "displayName": "pgTAP RLS",
   "description": "Write, review and run pgTAP tests for Supabase/Postgres Row Level Security, grants and SQL functions, with a mutation check and machine-readable evidence.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "Apache-2.0",
   "author": {
     "name": "AndresDiagoM"

@@ -39,11 +39,16 @@
 - Tier B evals on real repos with an agent session (run the gate, diagnose an injected flaky spec).
 - Shorten the remaining long kit paths (longest is about 85 characters).
 
-**pgtap-rls**
+**pgtap-rls** (in progress)
+- Adopted from github/awesome-copilot `supabase-rls-policies` (commit e593e66, credited in the README):
+  - Other-user UPDATE/DELETE probes read no column (`update t set col = 'x' returning 1`, no `where`), so a correct SELECT policy cannot hide an UPDATE/DELETE policy that is too open. The victim row is still re-read as its owner.
+  - Owner transfer: the other user cannot move their own row to the owner (`update t set user_id = '<owner>'` fails with `42501`).
+  - Claims-based and restrictive policies: set the full `request.jwt.claims` object at every switch; an `aal2` restrictive example (aal1 denied, aal2 allowed, positive control).
+- Positioning: `supabase-rls-policies` helps write policies; `pgtap-rls` proves them across the schema. Recommend both.
 - Q1 and Q2: rubric fails in both arms; decide whether the rubric is too strict. Q5: Bash fails with "Failed to create bridge sockets" in the eval sandbox; diagnose.
 - Basejump notes and verbose-output capture still unverified.
 - Test in a non-Claude agent (opencode or Codex).
-- `SKILL.md` is at 5104/5120 bytes: trim before adding anything.
+- `SKILL.md` is at about 5104/5120 bytes: trim before adding anything.
 
 **Evals (both)**
 - Bash evals need WSL2 (no sandbox on native Windows) and must run one at a time.

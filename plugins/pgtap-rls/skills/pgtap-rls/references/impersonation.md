@@ -25,7 +25,26 @@ set local role authenticated;
 | anon | `{"role":"anon"}` (no `sub`), then `set local role anon` | deny cases |
 | service_role | `{"role":"service_role"}`, then `set local role service_role` | seed, read back, one positive control (it bypasses RLS) |
 
-Policies that read other claims (`auth.jwt() -> 'app_metadata' ->> 'k'`): add those keys to the JSON.
+## Policies that read claims (`aal`, `app_metadata`, ...)
+Set the FULL claims object at every switch: `sub`, `role` and every claim the policy reads. A switch that sets only
+`sub` leaves `auth.jwt()->>'aal'` (or `'app_metadata'`) null: `auth.uid()` still works, but a policy comparing the
+claim denies everyone, so a deny test passes for the wrong reason. Pair each such deny with:
+- a claims guard, `is((select auth.jwt()->>'aal'), 'aal1', ...)`, so the test proves the session carries what it claims;
+- a positive control with the satisfying claims (`"aal":"aal2"`) for the same user and row.
+
+Restrictive example (worked file: `assets/claims-aal2.test.sql`, 10/10 green 2026-11-12). The policy is created in the
+test transaction only so the file is self-contained; a real project already has it in a migration:
+```sql
+create policy zz_docs_require_aal2 on public.zz_docs as restrictive for all to authenticated
+  using ((select auth.jwt()->>'aal') = 'aal2');
+-- as the owner with {"sub":"<A>","role":"authenticated","aal":"aal1"}
+select is_empty($select 1 from public.zz_docs where id = '<row-id>'$, 'owner at aal1 cannot read the row');
+-- same user, "aal":"aal2": positive control
+select isnt_empty($select 1 from public.zz_docs where id = '<row-id>'$, 'owner at aal2 reads the row');
+```
+A restrictive policy only narrows, and `for all` also checks written rows: an aal1 insert is refused with `42501`
+(assert it). Prove the aal1 deny can fail by removing or loosening the restrictive policy, not with the permissive
+mutation of `coverage-and-mutation.md`.
 
 ## Pitfalls
 - **Stale claims.** `reset role; set local role anon;` without new claims leaves the previous user's claims set, so

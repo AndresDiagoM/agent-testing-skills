@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 (2026-11-12)
+
+Three test patterns learned from [`github/awesome-copilot` `supabase-rls-policies`](https://github.com/github/awesome-copilot/blob/e593e6649d3b538772b7329b26bcd626b54900ff/skills/supabase-rls-policies/SKILL.md) (commit `e593e6649d`).
+- Unfiltered write probes: the other user's UPDATE/DELETE probes are now `update t set col = 'x' returning 1` and `delete from t returning 1` with no `where`, while that user owns no rows (`assets/policy-matrix.test.sql`, `references/policy-matrix.md`). A column read applies the SELECT policy too, which hid a too-open UPDATE or DELETE policy. Verified: mutating only the UPDATE or only the DELETE policy now turns the deny test red; the old filtered probes stayed green. The reference says what to do when the other user must own rows.
+- Owner transfer case: the other user inserts a row, then `update t set user_id = '<owner>'` with no `where` must raise `42501` (`with check`). `policy-matrix.test.sql` is now 19 tests.
+- Claims-based and restrictive policies: `assets/claims-aal2.test.sql` (10 tests, temporary `aal2` restrictive policy, aal1 denied, aal2 allowed, positive control, claims guards, sub-only trap) and a section in `references/impersonation.md`: set the full `request.jwt.claims` at every switch. `coverage-and-mutation.md`: the permissive mutation cannot flip a restrictive denial, so edit the policy by hand; the mutation line goes after the policies for files that create their table inline.
+- `SKILL.md` rule 7 and the template list updated (5113 bytes). `VERSIONS.md` records the mutation runs.
+- Fix: `tap-to-evidence.mjs` reported `pgtap-rls 0.1.0` while `plugin.json` said 0.2.0, which failed the version test; the script and the test now say 0.2.0 (bump both with `plugin.json`).
+- Docs: README and `docs/why.md` describe `supabase-rls-policies` as complementary and credit the patterns above.
+
 ## 0.2.0 (2026-11-12)
 
 - `client-rls.test.ts.tmpl` verified with Vitest 5 + supabase-js against a local stack (unique user prefix per run, `seedRow` hook, cleanup checked).

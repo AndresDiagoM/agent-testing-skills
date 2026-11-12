@@ -4,9 +4,11 @@
 -- catalog, not memory, to read its policies) and keep the test blocks.
 -- Table-specific parts: the "example table" block and the table name. Generic parts: roles, claims, silent denials.
 -- ids: file 11; owner = ...0a, other = ...0b.
+-- Order matters: the other user owns NO row while the unfiltered UPDATE/DELETE probes run (see the OTHER USER block).
+-- Mutation check on THIS file: the table is created inside it, so paste the mutation line after the policies, not after plan().
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(18);
+select plan(19);
 
 -- ---------- example table (replace with the real one) ----------
 create table public.zz_notes (
@@ -30,8 +32,8 @@ insert into auth.users (id, email) values
   ('11000000-0000-0000-0000-00000000000b', '11-other@test.local');
 insert into public.zz_notes (id, user_id, body) values
   ('11a00000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-00000000000a', 'a1'),
-  ('11a00000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-00000000000a', 'a2'),
-  ('11b00000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-00000000000b', 'b1');
+  ('11a00000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-00000000000a', 'a2');
+-- no fixture row for the other user: it would make the unfiltered write probes below touch their own row
 
 -- ================= OWNER (allow cases + positive control) =================
 reset role;
@@ -54,11 +56,15 @@ set local role authenticated;
 select is((select count(*)::int from public.zz_notes where id = '11a00000-0000-0000-0000-000000000001'), 0, 'other user cannot see the owner row (RLS filters, 0 rows)');
 -- INSERT is refused by WITH CHECK: error 42501
 select throws_ok($$insert into public.zz_notes (user_id, body) values ('11000000-0000-0000-0000-00000000000a', 'x')$$, '42501', null, 'other user cannot insert a row for the owner (with check)');
--- UPDATE and DELETE are silent: no error, zero rows touched
-select is_empty($$update public.zz_notes set body = 'hacked' where id = '11a00000-0000-0000-0000-000000000001' returning 1$$, 'other user UPDATE touches 0 rows');
-select is_empty($$delete from public.zz_notes where id = '11a00000-0000-0000-0000-000000000001' returning 1$$, 'other user DELETE touches 0 rows');
--- moving their own row to the owner is refused by WITH CHECK on UPDATE
-select throws_ok($$update public.zz_notes set user_id = '11000000-0000-0000-0000-00000000000a' where id = '11b00000-0000-0000-0000-000000000001'$$, '42501', null, 'other user cannot hand their row to the owner (with check on update)');
+-- UPDATE and DELETE are silent (no error, zero rows touched). NO where clause and `returning 1`: the probe reads no
+-- column, so Postgres does not apply the SELECT policy and a policy that is too open cannot hide behind a correct one.
+-- This only works while the other user owns no rows in the table (true here: nothing inserted for them yet).
+select is_empty($$update public.zz_notes set body = 'hacked' returning 1$$, 'other user UPDATE touches 0 rows (unfiltered, no column read)');
+select is_empty($$delete from public.zz_notes returning 1$$, 'other user DELETE touches 0 rows (unfiltered, no column read)');
+-- only now does the other user get a row of their own, for the owner-transfer case
+select lives_ok($$insert into public.zz_notes (id, user_id, body) values ('11b00000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-00000000000b', 'b1')$$, 'other user can insert their own row (with check)');
+-- OWNER TRANSFER: no where clause, so the update policy alone selects their own row; only WITH CHECK can stop the move
+select throws_ok($$update public.zz_notes set user_id = '11000000-0000-0000-0000-00000000000a'$$, '42501', null, 'other user cannot hand their row to the owner (with check on update)');
 
 -- Re-read the victim row as its owner: still there, unchanged
 reset role;

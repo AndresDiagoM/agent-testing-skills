@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.3.0';
 export const REPORTED_BY = `pgtap-rls ${VERSION}`; // format documented by test-gate: "<skill> <version>"
 const MAX_MSG = 300;
 const MAX_FAILURES = 100;

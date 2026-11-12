@@ -39,7 +39,7 @@ npx skills add AndresDiagoM/agent-testing-skills --skill pgtap-rls
 | Skill | What it does | Version |
 |---|---|---|
 | [test-gate](plugins/test-gate) | Run and supervise quality gates (lint, typecheck, unit, DB, build, e2e) in JS/TS projects with machine-readable evidence | 0.2.0 |
-| [pgtap-rls](plugins/pgtap-rls) | pgTAP tests for Supabase/Postgres Row Level Security, grants and SQL functions | 0.2.0 |
+| [pgtap-rls](plugins/pgtap-rls) | pgTAP tests for Supabase/Postgres Row Level Security, grants and SQL functions | 0.3.0 |
 
 ## Contributing a skill
 
