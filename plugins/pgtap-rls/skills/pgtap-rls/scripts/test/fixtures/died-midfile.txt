@@ -1,0 +1,12 @@
+supabase/tests/database/04_funcs.test.sql ....... psql:supabase/tests/database/04_funcs.test.sql:12: ERROR:  relation "public.nope" does not exist
+LINE 1: select count(*) from public.nope
+supabase/tests/database/04_funcs.test.sql ....... Dubious, test returned 3 (wstat 768, 0x300)
+Failed 20/22 subtests
+
+Test Summary Report
+-------------------
+supabase/tests/database/04_funcs.test.sql (Wstat: 768 Tests: 2 Failed: 0)
+  Non-zero exit status: 3
+  Parse errors: Bad plan.  You planned 22 tests but ran 2.
+Files=1, Tests=2,  0 wallclock secs ( 0.01 usr  0.00 sys +  0.01 cusr  0.00 csys =  0.02 CPU)
+Result: FAIL

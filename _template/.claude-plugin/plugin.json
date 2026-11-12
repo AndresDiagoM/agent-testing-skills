@@ -1,0 +1,9 @@
+{
+  "name": "__NAME__",
+  "description": "__DESCRIPTION__",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AndresDiagoM"
+  }
+}

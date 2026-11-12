@@ -1,0 +1,7 @@
+**/evals/results/
+*.zip
+node_modules/
+# Internal planning material (local paths, private project details): not published
+specs/
+prompt-*.md
+.eval-work/

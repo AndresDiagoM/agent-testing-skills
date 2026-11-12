@@ -1,0 +1,6 @@
+Target: local stack (127.0.0.1:54322) · default; pass --remote for <linked project>
+psql:/work/scratch/died.test.sql:2: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/scratch/died.test.sql:5: ERROR:  relation "public.does_not_exist" does not exist
+LINE 1: select count(*) from public.does_not_exist;
+                             ^
+error running container: exit 1

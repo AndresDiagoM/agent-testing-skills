@@ -1,0 +1,19 @@
+# Agent skills for honest, fast testing
+
+> Agent Skills (SKILL.md format, agentskills.io) for Claude Code, Codex, opencode, Antigravity and Cursor. test-gate makes agents run and supervise JS/TS quality gates (lint, typecheck, unit, DB, build, Playwright/Cypress e2e) once, with time caps, login-once auth, signal-based waits, no weakened flaky tests, and a machine-readable evidence file. pgtap-rls writes and runs pgTAP tests for Supabase/Postgres Row Level Security, grants and SQL functions, including silent UPDATE/DELETE denials and a mutation check that proves a test can fail.
+
+Problems covered: agents re-running or batching test suites with sleeps; e2e tests logging in through the UI and hitting auth rate limits; "fixing" flaky tests with retries, test.fixme, skip, broader locators or longer timeouts; networkidle/waitForTimeout instead of hydration signals; unsupervised subagents running tests for an hour; "tests pass" claims with no evidence; Playwright on Windows stalling with several bundled Chromium; stale servers and builds; missing pgTAP/RLS coverage for anon, owner, other user and service_role; security definer search_path and grants.
+
+## Skills
+- [test-gate SKILL.md](plugins/test-gate/skills/test-gate/SKILL.md): rules and routing for running and supervising quality gates
+- [test-gate README](plugins/test-gate/README.md): problems solved, install, FAQ
+- [pgtap-rls SKILL.md](plugins/pgtap-rls/skills/pgtap-rls/SKILL.md): rules and routing for pgTAP RLS tests
+- [pgtap-rls README](plugins/pgtap-rls/README.md): problems solved, install, FAQ
+
+## Background
+- [Why these skills](docs/why.md): gaps in existing testing skills, with sources
+- [Evidence file schema](plugins/test-gate/skills/test-gate/references/evidence-schema.md): the shared `.gate/last.json` contract
+
+## Install
+- Claude Code: `/plugin marketplace add AndresDiagoM/agent-testing-skills` then `/plugin install <skill>@agent-testing-skills`
+- Other agents: `npx skills add AndresDiagoM/agent-testing-skills --skill <skill>`

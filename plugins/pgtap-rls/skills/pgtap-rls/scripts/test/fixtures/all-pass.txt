@@ -1,0 +1,5 @@
+supabase/tests/database/01_rls.test.sql ......... ok
+supabase/tests/database/02_triggers.test.sql .... ok
+All tests successful.
+Files=2, Tests=30,  1 wallclock secs ( 0.01 usr  0.00 sys +  0.02 cusr  0.01 csys =  0.04 CPU)
+Result: PASS

@@ -1,0 +1,14 @@
+supabase/tests/database/01_rls.test.sql ......... 1/22
+# Failed test 3: "A does not see B portfolios"
+#         have: 1
+#         want: 0
+# Looks like you failed 1 test of 22
+supabase/tests/database/01_rls.test.sql ......... Failed 1/22 subtests
+supabase/tests/database/02_triggers.test.sql .... ok
+
+Test Summary Report
+-------------------
+supabase/tests/database/01_rls.test.sql (Wstat: 0 Tests: 22 Failed: 1)
+  Failed test:  3
+Files=2, Tests=30,  1 wallclock secs ( 0.01 usr  0.00 sys +  0.02 cusr  0.01 csys =  0.04 CPU)
+Result: FAIL

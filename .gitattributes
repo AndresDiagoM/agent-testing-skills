@@ -1,0 +1,2 @@
+# Test fixtures must keep their exact bytes (CRLF/ANSI cases)
+**/fixtures/*.txt -text

@@ -1,0 +1,73 @@
+{
+  "ok": true,
+  "finishedAt": "2026-11-12T20:19:31.104Z",
+  "totalMs": 118520,
+  "args": [
+    "--only",
+    "e2e"
+  ],
+  "steps": [
+    {
+      "name": "lint",
+      "command": "pnpm lint",
+      "exitCode": null,
+      "wallMs": 0,
+      "timeoutMs": 600000,
+      "counts": null,
+      "status": "skipped"
+    },
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "exitCode": null,
+      "wallMs": 0,
+      "timeoutMs": 600000,
+      "counts": null,
+      "status": "skipped"
+    },
+    {
+      "name": "test",
+      "command": "pnpm test",
+      "exitCode": null,
+      "wallMs": 0,
+      "timeoutMs": 600000,
+      "counts": null,
+      "status": "skipped"
+    },
+    {
+      "name": "db:test",
+      "command": "pnpm db:test",
+      "exitCode": null,
+      "wallMs": 0,
+      "timeoutMs": 600000,
+      "counts": null,
+      "status": "skipped"
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "exitCode": null,
+      "wallMs": 0,
+      "timeoutMs": 600000,
+      "counts": null,
+      "status": "skipped"
+    },
+    {
+      "name": "e2e",
+      "command": "pnpm test:e2e",
+      "exitCode": 0,
+      "wallMs": 118514,
+      "timeoutMs": 900000,
+      "counts": {
+        "passed": 102,
+        "failed": 0,
+        "skipped": 1,
+        "flaky": 0,
+        "interrupted": 0,
+        "didNotRun": 0
+      },
+      "status": "passed",
+      "port": 3200
+    }
+  ]
+}

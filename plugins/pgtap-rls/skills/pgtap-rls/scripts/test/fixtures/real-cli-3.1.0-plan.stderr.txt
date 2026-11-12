@@ -1,0 +1,3 @@
+Target: local stack (127.0.0.1:54322) · default; pass --remote for <linked project>
+psql:/work/scratch/plan.test.sql:2: NOTICE:  extension "pgtap" already exists, skipping
+error running container: exit 1

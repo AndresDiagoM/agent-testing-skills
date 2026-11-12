@@ -1,0 +1,11 @@
+/work/scratch/died.test.sql .. 
+Dubious, test returned 3 (wstat 768, 0x300)
+Failed 1/2 subtests 
+
+Test Summary Report
+-------------------
+/work/scratch/died.test.sql (Wstat: 768 (exited 3) Tests: 1 Failed: 0)
+  Non-zero exit status: 3
+  Parse errors: Bad plan.  You planned 2 tests but ran 1.
+Files=1, Tests=1,  0 wallclock secs ( 0.02 usr  0.00 sys +  0.01 cusr  0.00 csys =  0.03 CPU)
+Result: FAIL

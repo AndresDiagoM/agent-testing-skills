@@ -1,0 +1,16 @@
+$ supabase test db
+Target: local stack (127.0.0.1:54322) · default; pass --remote for <linked project>
+psql:/work/app/supabase/tests/database/01_rls.test.sql:3: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/02_triggers.test.sql:3: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/03_search_and_runs.test.sql:3: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/04_replace_etf_holdings.test.sql:3: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/05_ledger_order_parity.test.sql:3: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/06_finance_f2.test.sql:4: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/06_finance_f3.test.sql:3: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/06_finance_hardening.test.sql:4: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/06_finance_logic.test.sql:4: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/06_finance_rls.test.sql:3: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/07_hypothetical_limit.test.sql:6: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/07_save_hypothetical_portfolio.test.sql:5: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/07_set_portfolio_weights.test.sql:4: NOTICE:  extension "pgtap" already exists, skipping
+psql:/work/app/supabase/tests/database/09_search_instruments.test.sql:4: NOTICE:  extension "pgtap" already exists, skipping

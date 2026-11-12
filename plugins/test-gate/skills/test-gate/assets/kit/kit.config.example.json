@@ -1,0 +1,27 @@
+{
+  "packageManager": "auto",
+  "requiredSteps": ["lint", "typecheck", "test", "build", "e2e"],
+  "steps": {
+    "typecheck": { "script": "type-check", "timeoutMin": 10 },
+    "e2e": {
+      "command": "<pm> exec playwright test",
+      "timeoutMin": 15,
+      "env": { "E2E_USE_BUILD": "1" },
+      "jsonReport": false
+    }
+  },
+  "e2e": {
+    "portStart": 3200,
+    "buildIdFile": "<dir>/.next/BUILD_ID",
+    "sourceDirs": ["<dir>/app", "<dir>/components", "<dir>/public", "<dir>/next.config.ts"]
+  },
+  "evidence": { "dir": ".gate" },
+  "_notes": [
+    "Placeholders in angle brackets are filled per repo. No secret values live in this file.",
+    "steps.<name>: script (a package.json script) OR command (<pm> is replaced by the detected manager, '<pm> exec' by its exec form), timeoutMin, env, kind (lint|typecheck|unit|db|build|e2e|parity|custom), allowEmpty {reason}, approval {reason, approvedBy, approvalRef} (whole step skipped), approvedSkips [{test, reason, issue, approvedBy, approvalRef, approvedAt, recheckBy}].",
+    "approvedBy is 'user' or 'orchestrator' quoting a standing user instruction; never the agent that wrote the skip.",
+    "Unlisted steps get package.json script resolution (spec section 5). requiredSteps defaults to lint, typecheck, test, db:test, build, e2e.",
+    "e2e.buildIdFile + e2e.sourceDirs enable the stale-build check when e2e runs without a build step; jsonReport: true exports PLAYWRIGHT_JSON_OUTPUT_FILE (use with a json reporter in the Playwright config or --reporter=list,json in the command).",
+    "Not read by v0.1 gate.mjs: stopGate, authRoles, healthUrl, channelOnWindows (reserved for v0.2 kit files)."
+  ]
+}

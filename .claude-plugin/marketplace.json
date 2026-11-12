@@ -1,0 +1,21 @@
+{
+  "name": "agent-testing-skills",
+  "owner": {
+    "name": "AndresDiagoM"
+  },
+  "metadata": {
+    "description": "Agent Skills by AndresDiagoM, packaged as Claude Code plugins (one skill per plugin)."
+  },
+  "plugins": [
+    {
+      "name": "pgtap-rls",
+      "source": "./plugins/pgtap-rls",
+      "description": "pgTAP tests for Supabase Row Level Security, grants and SQL functions."
+    },
+    {
+      "name": "test-gate",
+      "source": "./plugins/test-gate",
+      "description": "Run and supervise quality gates (lint, typecheck, unit, DB, build, e2e) in JS/TS projects with machine-readable evidence."
+    }
+  ]
+}

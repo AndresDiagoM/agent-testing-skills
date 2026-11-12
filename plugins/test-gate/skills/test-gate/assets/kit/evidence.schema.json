@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/test-gate/evidence.schema.json",
+  "title": "test-gate evidence file (.gate/last.json), schema v2",
+  "description": "v2 only ADDS fields to the v1 shape. A file without schemaVersion is v1. Readers ignore unknown fields; writers keep them.",
+  "type": "object",
+  "required": ["ok", "finishedAt", "totalMs", "args", "steps"],
+  "properties": {
+    "schemaVersion": { "const": 2, "description": "Absent means v1." },
+    "ok": { "type": "boolean", "description": "v1 meaning: every recorded step passed or was skipped." },
+    "complete": { "type": "boolean", "description": "ok AND every requiredSteps entry is fresh and passed, or skipped with a valid approval; no unapproved skipped tests, flaky or interrupted tests, partial scope." },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "totalMs": { "type": "number", "description": "Sum of wallMs of the non-stale steps." },
+    "args": { "type": "array", "items": { "type": "string" } },
+    "requiredSteps": { "type": "array", "items": { "$ref": "#/$defs/stepName" } },
+    "git": {
+      "type": "object",
+      "properties": { "head": { "type": "string" }, "dirty": { "type": "boolean" } }
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "os": { "type": "string" },
+        "node": { "type": "string" },
+        "packageManager": { "type": "string" },
+        "tools": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "build": {
+      "type": "object",
+      "properties": { "id": { "type": "string" }, "builtAt": { "type": "string" }, "servedId": { "type": "string" } },
+      "description": "id !== servedId means the e2e ran against another build: complete is false."
+    },
+    "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } }
+  },
+  "$defs": {
+    "stepName": { "type": "string", "pattern": "^[a-z0-9:_-]+$" },
+    "approval": {
+      "type": "object",
+      "required": ["reason", "approvedBy", "approvalRef"],
+      "properties": {
+        "reason": { "type": "string", "minLength": 1 },
+        "approvedBy": { "enum": ["user", "orchestrator"] },
+        "approvalRef": { "type": "string", "minLength": 1, "description": "The user message or standing instruction quoted." },
+        "approvedAt": { "type": "string" }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "required": ["test"],
+      "properties": {
+        "test": { "type": "string" },
+        "file": { "type": "string" },
+        "message": { "type": "string", "maxLength": 300 }
+      },
+      "additionalProperties": true
+    },
+    "step": {
+      "type": "object",
+      "required": ["name", "status", "command", "exitCode", "wallMs", "timeoutMs"],
+      "properties": {
+        "name": { "$ref": "#/$defs/stepName" },
+        "kind": { "enum": ["lint", "typecheck", "unit", "db", "build", "e2e", "parity", "custom"] },
+        "status": { "enum": ["passed", "failed", "timeout", "skipped", "not-run"] },
+        "command": { "type": "string" },
+        "exitCode": { "type": ["integer", "null"] },
+        "startedAt": { "type": "string" },
+        "finishedAt": { "type": "string" },
+        "wallMs": { "type": "number" },
+        "timeoutMs": { "type": "number" },
+        "previousPassMs": { "type": "number" },
+        "port": { "type": "integer" },
+        "counts": {
+          "type": ["object", "null"],
+          "properties": { "passed": { "type": "number" }, "failed": { "type": "number" }, "skipped": { "type": "number" } },
+          "additionalProperties": true,
+          "description": "Minimum for test kinds: passed, failed, skipped. Legacy keys stay: todo, runs, flaky, interrupted, didNotRun, files, tests, result."
+        },
+        "failures": { "type": "array", "items": { "$ref": "#/$defs/failure" } },
+        "flaky": { "type": "array", "items": { "$ref": "#/$defs/failure" } },
+        "approvedSkips": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["test", "reason", "approvedBy", "approvalRef"],
+            "properties": {
+              "test": { "type": "string" },
+              "reason": { "type": "string" },
+              "issue": { "type": "string" },
+              "approvedBy": { "enum": ["user", "orchestrator"] },
+              "approvalRef": { "type": "string" },
+              "approvedAt": { "type": "string" },
+              "recheckBy": { "type": "string" }
+            }
+          }
+        },
+        "approval": { "$ref": "#/$defs/approval" },
+        "allowEmpty": { "type": "object", "required": ["reason"], "properties": { "reason": { "type": "string" } } },
+        "scope": {
+          "type": "object",
+          "required": ["kind"],
+          "properties": { "kind": { "enum": ["all", "files"] }, "files": { "type": "array", "items": { "type": "string" } } },
+          "description": "A files scope forces complete:false."
+        },
+        "stale": { "const": true, "description": "Set by gate.mjs on steps it did not run in this invocation." },
+        "skipReason": { "type": "string" },
+        "problems": { "type": "array", "items": { "type": "string" }, "description": "Why the writer downgraded the step to failed (honesty rules)." },
+        "details": { "type": "object", "description": "Namespaced free-form data per tool, e.g. details.pgtap." },
+        "logFile": { "type": "string" },
+        "reportedBy": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

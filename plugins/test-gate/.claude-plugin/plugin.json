@@ -1,0 +1,9 @@
+{
+  "name": "test-gate",
+  "description": "Agent skill to run and supervise quality gates (lint, typecheck, unit, DB, build, e2e) in JS/TS projects: one full run per gate, login once, no weakened tests, machine-readable evidence.",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AndresDiagoM"
+  }
+}

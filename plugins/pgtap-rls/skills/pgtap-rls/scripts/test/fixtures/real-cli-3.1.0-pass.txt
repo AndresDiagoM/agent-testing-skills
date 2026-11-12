@@ -1,0 +1,17 @@
+/work/app/supabase/tests/database/01_rls.test.sql .......................... ok
+/work/app/supabase/tests/database/02_triggers.test.sql ..................... ok
+/work/app/supabase/tests/database/03_search_and_runs.test.sql .............. ok
+/work/app/supabase/tests/database/04_replace_etf_holdings.test.sql ......... ok
+/work/app/supabase/tests/database/05_ledger_order_parity.test.sql .......... ok
+/work/app/supabase/tests/database/06_finance_f2.test.sql ................... ok
+/work/app/supabase/tests/database/06_finance_f3.test.sql ................... ok
+/work/app/supabase/tests/database/06_finance_hardening.test.sql ............ ok
+/work/app/supabase/tests/database/06_finance_logic.test.sql ................ ok
+/work/app/supabase/tests/database/06_finance_rls.test.sql .................. ok
+/work/app/supabase/tests/database/07_hypothetical_limit.test.sql ........... ok
+/work/app/supabase/tests/database/07_save_hypothetical_portfolio.test.sql .. ok
+/work/app/supabase/tests/database/07_set_portfolio_weights.test.sql ........ ok
+/work/app/supabase/tests/database/09_search_instruments.test.sql ........... ok
+All tests successful.
+Files=14, Tests=370,  2 wallclock secs ( 0.15 usr  0.03 sys +  0.16 cusr  0.12 csys =  0.46 CPU)
+Result: PASS
