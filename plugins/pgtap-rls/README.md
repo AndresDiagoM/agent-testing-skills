@@ -1,6 +1,63 @@
 # pgtap-rls
 
+[![skills.sh](https://www.skills.sh/b/AndresDiagoM/agent-testing-skills)](https://www.skills.sh/andresdiagom/agent-testing-skills)
+![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)
+![Version 0.3.1](https://img.shields.io/badge/version-0.3.1-blue)
+
 An agent skill that writes, reviews and runs pgTAP tests for Supabase/Postgres Row Level Security (RLS) policies, grants and SQL functions, and records the result as machine-readable evidence.
+
+## Before / after
+
+Before: a "deny" test that cannot fail. RLS filters an UPDATE to zero rows and raises no error, so this passes whether the policy is correct or wide open.
+
+```sql
+select lives_ok($$update public.zz_notes set body = 'hacked' where id = '...'$$, 'other user cannot update');
+```
+
+After (from `assets/policy-matrix.test.sql`): an unfiltered probe that reads no column, so a correct SELECT policy cannot hide a too-open UPDATE policy, then a re-read as the owner.
+
+```sql
+select is_empty($$update public.zz_notes set body = 'hacked' returning 1$$, 'other user UPDATE touches 0 rows (unfiltered, no column read)');
+-- ... then, as the owner:
+select is((select body from public.zz_notes where id = '11a00000-0000-0000-0000-000000000001'), 'edited', 'owner row survived the other user attempts unchanged');
+```
+
+The mutation check (`scripts/mutate-test.mjs`) then adds a temporary `using (true)` policy in a scratch copy and the deny test must turn red. If it stays green, the test is vacuous.
+
+## Measured results
+
+`claude plugin eval` with Sonnet, 2026-11-12 (raw files are in `evals/results/`, which is git-ignored; summary in [evals/README.md](evals/README.md)):
+
+- Trigger and negative cases: 24/24 runs pass (4 trigger and 4 negative cases, 3 runs each). The skill loads on pgTAP/RLS prompts and stays out of Playwright, policy-writing, slow-query and Vitest prompts.
+- Quality, one run per arm against a real local Supabase stack: Q3 +0.75 (1.00 with the skill, 0.25 without) and Q4 +0.40 (1.00 and 0.60). An earlier Q3 run scored 0.25 with the skill, so one run is a weak signal.
+- Q1 and Q2 scored the same with and without the skill (rubric fails in both arms). Q5 failed in both arms because Bash could not start in the sandbox. These three are still open.
+- These runs loaded plugin version 0.1.0; later versions were not re-evaluated.
+- Mutation runs on a live stack: with the old filtered probes, an UPDATE-only or DELETE-only policy mutation left the deny tests green. With the unfiltered probes both turn red. Details in `skills/pgtap-rls/references/VERSIONS.md`.
+
+## What you get
+
+`scripts/tap-to-evidence.mjs` turns `supabase test db` output into a `db:test` step in `.gate/last.json`. Real output from a captured CLI 3.1.0 run (one wrong expectation in a 22-test file), trimmed:
+
+```json
+{
+  "name": "db:test",
+  "kind": "db",
+  "status": "failed",
+  "command": "supabase test db",
+  "exitCode": 1,
+  "counts": { "passed": 21, "failed": 1, "skipped": 0, "files": 1, "tests": 22, "result": "FAIL" },
+  "scope": { "kind": "all" },
+  "reportedBy": "pgtap-rls 0.3.1",
+  "failures": [
+    { "test": "A does not see B portfolios", "file": "/work/scratch/01_rls_wrong.test.sql",
+      "number": 2, "have": "0", "want": "1" }
+  ],
+  "details": { "pgtap": { "result": "FAIL", "skipsVisible": false,
+    "statusReasons": ["exit code 1", "Result: FAIL", "1 failed test(s)"] } }
+}
+```
+
+Fields such as `finishedAt`, `wallMs`, `timeoutMs`, `logFile` and `message` are left out here. `skipped` is 0 because the CLI output does not show skips (`skipsVisible: false`).
 
 ## Problems this solves
 
@@ -46,24 +103,54 @@ Claude Code:
 
 Other agents ([Agent Skills](https://agentskills.io) standard):
 ```
-npx skills add AndresDiagoM/agent-testing-skills --skill pgtap-rls
+npx skills@1.7.4 add AndresDiagoM/agent-testing-skills --skill pgtap-rls
 ```
 
+`npx skills` installs into `.claude/skills` and `.agents/skills`. We checked this for `test-gate` on 2026-11-12; `pgtap-rls` uses the same mechanism. Other Agent Skills agents are not tested yet.
+
 ## Usage
+
+In Claude Code, type `/pgtap-rls:pgtap-rls` (plugin install) or `/pgtap-rls` (skill-folder install), or ask in plain words. Example prompts:
 
 - "Add pgTAP tests proving user B can't read or update user A's rows in `notes`."
 - "Audit the RLS policies in my latest migration and write tests for them."
 - "`supabase test db` fails on 01_rls.test.sql, test 7. Help me fix it."
 - "Is my `get_balance(uuid)` security definer function safe? Write tests for who can call it."
 
+Not for: Playwright/e2e or Vitest/Jest tests, query performance, or designing the policies themselves.
+
 Scripts (Node 20+, no dependencies, no network): `node skills/pgtap-rls/scripts/tap-to-evidence.mjs --help`, `node skills/pgtap-rls/scripts/mutate-test.mjs --help`.
+
+## Updating and uninstalling
+
+Claude Code (restart it to apply an update):
+```
+/plugin marketplace update agent-testing-skills
+/plugin update pgtap-rls@agent-testing-skills
+/plugin uninstall pgtap-rls@agent-testing-skills
+```
+Outside a session, the same commands work as `claude plugin marketplace update agent-testing-skills`, `claude plugin update …` and `claude plugin uninstall …`. If you installed with `npx skills`, delete the `pgtap-rls` folder from `.claude/skills` and `.agents/skills`, and install again to update. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+
+## When something goes wrong
+
+- **The skill does not load.** Type `/pgtap-rls:pgtap-rls` (or `/pgtap-rls`), or say "use the pgtap-rls skill". Check that the plugin shows as installed in `/plugin`, and restart Claude Code after an install or update.
+- **`supabase test db` output is not parsed.** `tap-to-evidence.mjs` never records a pass it cannot confirm: a missing `Files=N, Tests=M` summary, `Result: NOTESTS` (no test files), zero tests, a plan mismatch or a died file all give `status: "failed"`, and `details.pgtap.statusReasons` says why. Parsing a saved log needs `--command` and `--exit-code`.
+- **Anything else.** Open an issue: https://github.com/AndresDiagoM/agent-testing-skills/issues
 
 ## Tested with
 
-- Scripts: `node --test` (38 tests) on Node 26, Windows.
-- SQL templates and reference snippets: ran green on a local Supabase stack (Postgres 17.11, pgTAP 1.3.3, CLI 3.1.0) on 2026-11-12; the optional client-level template is not run yet. `skills/pgtap-rls/references/VERSIONS.md` has the list.
-- Agents: not yet tested in Claude Code or another agent (see `CHECKLIST.md`).
+- Scripts: `node --test` (38 tests, all passing) on Node 26, Windows.
+- SQL templates and reference snippets: ran green on a local Supabase stack (Postgres 17.11, pgTAP 1.3.3, CLI 3.1.0) on 2026-11-12; the optional client-level template ran against a local stack with Vitest 5 and supabase-js. `skills/pgtap-rls/references/VERSIONS.md` has the list.
+- Agents: the trigger and quality evals ran in Claude Code (`claude plugin eval`, Sonnet) on 2026-11-12. Other agents are not tested yet (see `CHECKLIST.md`).
 - Written for Supabase CLI 3.1.0 / Postgres 17.
+
+## Contributing
+
+See [CONTRIBUTING.md](../../CONTRIBUTING.md).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

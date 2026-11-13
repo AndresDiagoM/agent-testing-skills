@@ -50,7 +50,7 @@ test('tap-to-evidence step merged into a gate.mjs-written v2 file validates agai
     assert.deepEqual(out.steps.map((s) => s.name), ['lint', 'db:test']);
     const db = out.steps[1];
     assert.equal(db.status, 'passed');
-    assert.equal(db.reportedBy, 'pgtap-rls 0.3.0');
+    assert.equal(db.reportedBy, 'pgtap-rls 0.3.1');
     assert.equal(db.counts.skipped, 0);
     assert.equal(db.details.pgtap.files, 2);
     assert.equal(out.steps[0].reportedBy, 'gate.mjs 0.1.0', 'lint step untouched');

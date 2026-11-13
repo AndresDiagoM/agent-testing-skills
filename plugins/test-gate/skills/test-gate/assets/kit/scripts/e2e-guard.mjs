@@ -12,7 +12,7 @@ import { DEFAULT_CONFIG, analyze, countHard, formatReport, isTestFile, judgeHits
 
 export { scanSource, stripComments, judgeHits, countHard, HARD_RULES } from './guard-core.mjs';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
 const EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.mts', '.cts']);
 const SKIP_DIRS = new Set(['node_modules', '.git', '.next', 'dist', 'coverage', 'playwright-report', 'test-results', '.auth']);
 const DEFAULT_DIRS = ['e2e', 'tests/e2e', 'test/e2e', 'apps/web/e2e'];

@@ -1,6 +1,82 @@
 # test-gate
 
+[![skills.sh](https://www.skills.sh/b/AndresDiagoM/agent-testing-skills)](https://www.skills.sh/andresdiagom/agent-testing-skills) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](../../LICENSE) [![Version 0.2.1](https://img.shields.io/badge/version-0.2.1-green)](CHANGELOG.md)
+
 An agent skill that makes a coding agent run and supervise quality gates (lint, typecheck, unit, DB, build, e2e) in JS/TS projects fast and honestly: one full run per gate, hard time caps, login once, waits on signals, no weakened tests, and a machine-readable evidence file.
+
+## Before / after
+
+**Before** (a real incident, plus a common habit):
+- An e2e gate took 1 h 41 min. Every test logged in through the UI and hit a limit of 30 sign-ins per 5 minutes. The agent split the suite into batches with sleeps of about 5 minutes. The tests themselves took about 30 s per batch.
+- A flaky test got "fixed" with retries, `test.fixme` or a longer timeout. The run turned green and the coverage was gone.
+
+**After** (what the skill makes the agent do):
+- One full run per gate, with a time cap per step. No batches, no sleeps.
+- Log in once in a `setup` project and reuse `storageState`. Only the auth spec uses the login UI.
+- Fix the flaky test at its cause. A skip needs approval from you or the orchestrator, never from the agent that writes it.
+- Leave `.gate/last.json` with the command, exit code, duration and counts of every step.
+
+We have no measured "after" time for the incident, so none is claimed.
+
+## Measured results
+
+Claude Code `claude plugin eval` with Sonnet, 2026-11-12, three runs per case, with plugin version 0.1.0 loaded (later versions not re-evaluated). The eval cases are in [`evals/`](evals); raw result files are kept locally, not in the repo.
+
+- Trigger and negative cases: 24/24 runs pass (8 cases). In the first pass one negative run failed because the grader was too strict; we reworded it and re-ran that case.
+- Quality score with the skill minus without it: `builder-brief` +0.73, `runaway-gate` +0.17, `flaky-fix` +0.13, `random-login` 0.
+- `random-login` showed no gain yet: the agent without the skill already found the fix.
+- `builder-brief` was +0.61 in the full four-case run and +0.73 when re-run alone. Small samples, one model: read these as a direction, not a benchmark.
+
+## Usage
+
+In Claude Code, type `/test-gate:test-gate` (plugin install) or `/test-gate` (skill-folder install), or describe the task. The skill loads on its own for requests like:
+
+- "Run the gate and tell me what failed."
+- "Why is this e2e test flaky?"
+- "Review my e2e spec for login and waiting problems."
+- "Write the brief for an agent that builds the /reports page and runs the e2e."
+- "The gate agent has been running for 55 minutes. What do you do?"
+- "Set up login once for our Playwright suite."
+
+Not for: writing a unit test for one function, fixing a type or lint error, or general debugging.
+
+## What you get
+
+`node scripts/gate.mjs` (optional kit, once installed in your repo) writes `.gate/last.json`. This is real output from a tiny fixture repo whose scripts only print test-runner summaries. It is trimmed (lint, typecheck, build and some fields such as `environment` removed). Schema: [`evidence-schema.md`](skills/test-gate/references/evidence-schema.md).
+
+```jsonc
+{
+  "schemaVersion": 2,
+  "ok": true,
+  "complete": true,          // every required step ran and passed
+  "finishedAt": "2026-11-13T00:38:14.284Z",
+  "totalMs": 2609,
+  "requiredSteps": ["lint", "typecheck", "test", "build", "e2e"],
+  "git": { "head": "5ab6d018e3dfe0550e16541946f9b8ad4853b59a", "dirty": true },
+  "steps": [
+    { "name": "test", "kind": "unit", "status": "passed", "command": "npm run test",
+      "exitCode": 0, "wallMs": 521, "timeoutMs": 600000, "scope": { "kind": "all" },
+      "counts": { "passed": 31, "failed": 0, "skipped": 0, "todo": 0, "runs": 1 } },
+    { "name": "e2e", "kind": "e2e", "status": "passed", "command": "npm run test:e2e",
+      "exitCode": 0, "wallMs": 534, "timeoutMs": 900000, "port": 3200,
+      "counts": { "passed": 12, "failed": 0, "skipped": 0, "flaky": 0 }, "logFile": ".gate/logs/e2e.log" }
+  ]
+}
+```
+
+## How it flows
+
+```
+brief ---> gate run ---------------------> evidence ----------> report
+rules,     one full run per step,          .gate/last.json       wall time, counts,
+caps,      cap per step,                   + logs under          skips, evidence path
+scope      stop at first failure           .gate/logs/
+              ^
+              |  supervisor: reads .gate/running.json and the log at ~30 min,
+              |  stops only the pid recorded there
+Stop hook (optional kit, Claude Code): lint, typecheck, related unit tests and
+the guard, 90 s budget, before the agent stops.
+```
 
 ## Problems this solves
 
@@ -46,12 +122,37 @@ Claude Code:
 /plugin install test-gate@agent-testing-skills
 ```
 
-Other agents ([Agent Skills](https://agentskills.io) standard):
+Other agents ([Agent Skills](https://agentskills.io) standard), with the [`skills`](https://github.com/vercel-labs/skills) CLI pinned to the version we tested:
 ```
-npx skills add AndresDiagoM/agent-testing-skills --skill test-gate
+npx skills@1.7.4 add AndresDiagoM/agent-testing-skills --skill test-gate
 ```
 
-## What is in v0.2
+- Verified on 2026-11-12: `npx skills` installs into the Claude Code folder (`.claude/skills`) and into the opencode and Codex folder (`.agents/skills`).
+- `scripts/install-global.mjs` (dry-run by default, `--apply` writes) puts one copy in `~/.agents/skills`, links it for Claude Code and opencode, and adds an entry to Antigravity's `skills.json`.
+- Other agents that support Agent Skills should work, but we have not tested them.
+
+## Updating and uninstalling
+
+Claude Code (syntax from `claude plugin --help`):
+```
+/plugin marketplace update agent-testing-skills
+/plugin update test-gate@agent-testing-skills
+/plugin uninstall test-gate@agent-testing-skills
+```
+Outside a session: `claude plugin marketplace update agent-testing-skills`, then `claude plugin update test-gate@agent-testing-skills`. A restart applies the update.
+
+With `npx`: re-run the `add` command above to get the latest version. The CLI also lists `update` and `remove` commands in its help (`npx skills@1.7.4 --help`); we have not tested them. If you copied the skill by hand, delete its folder.
+
+What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+
+## When something goes wrong
+
+- **The skill does not load:** type `/test-gate:test-gate` (or `/test-gate`) or say "use the test-gate skill".
+- **It loads for a task it should not:** the "Not for" line in Usage lists what it is not meant for. Tell the agent to ignore it for that task, and report it.
+- **The kit's guard blocks a change that is legitimate:** add a comment `// test-guard: approved <reason>` in the same hunk as the change.
+- **Anything else:** open an issue at https://github.com/AndresDiagoM/agent-testing-skills/issues.
+
+## What is in v0.2.1
 
 - `SKILL.md` (14 rules), ten references and the evidence schema (v2, shared with `pgtap-rls`).
 - Optional repo kit in `skills/test-gate/assets/kit/`, installed with `node assets/kit/install.mjs --target <repo>` (dry-run by default):
@@ -69,11 +170,16 @@ npx skills add AndresDiagoM/agent-testing-skills --skill test-gate
 - [x] Install via `npx skills add` into Claude Code, opencode and Codex skill folders (2026-11-12)
 - [ ] Used in a real opencode / Codex / Antigravity session: not yet
 
-Verified against Playwright 1.65.0, Vitest 5.1.0, Next 16.4.6 (2026-11-12); see `references/versions.md`.
+Verified against Playwright 1.65.0, Vitest 5.1.0, Next 16.4.6 (2026-11-12); see `references/versions.md`. The kit was also tried on scratch copies of two real projects, on Windows and WSL (see the changelog).
 
 ## Privacy and network
 
 The skill is plain Markdown. The kit scripts run locally with Node, make no network calls, send no telemetry and collect no data. They read your `package.json` and lockfile, run the commands your repo defines, and write only under `.gate/` (and the files you ask the installer to add).
+
+## Contributing and changelog
+
+- Contributing: [CONTRIBUTING.md](../../CONTRIBUTING.md)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
 
 ## License
 

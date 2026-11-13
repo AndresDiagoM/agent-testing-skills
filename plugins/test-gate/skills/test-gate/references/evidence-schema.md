@@ -59,7 +59,7 @@ Machine-readable result of the gate, one file per repo, git-ignored, overwritten
       "counts": { "passed": 45, "failed": 0, "skipped": 0 },
       "details": { "pgtap": { "files": 3, "tests": 45, "result": "PASS" } },
       "logFile": ".gate/logs/db-test.log",
-      "reportedBy": "pgtap-rls 0.1.0"
+      "reportedBy": "pgtap-rls 0.3.1"
     }
   ]
 }

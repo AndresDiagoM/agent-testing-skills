@@ -81,7 +81,7 @@ node scripts/new-skill.mjs mi-skill "Qué hace y cuándo usarla"
 
 - Si la skill es portable (fase 1), funciona tal cual con el estándar abierto:
   ```
-  npx skills add AndresDiagoM/agent-testing-skills --skill mi-skill
+  npx skills@1.7.4 add AndresDiagoM/agent-testing-skills --skill mi-skill
   ```
   (Vercel `skills`, Node 22.20+. Por defecto instala en el proyecto; con `-g`, global.)
 - Probar en al menos un agente distinto de Claude Code (por ejemplo opencode o Codex) y anotar en el README en cuáles se probó.

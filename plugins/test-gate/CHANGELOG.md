@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 (2026-11-12)
+
+- Docs only, no behaviour change. README: before/after, measured eval results, usage prompts, a real trimmed `.gate/last.json`, a flow diagram, updating and uninstalling, troubleshooting, badges. `npx skills` pinned to 1.7.4 (the version tested).
+- Manifest: `supportUrl`, `documentationUrl`, `privacyPolicyUrl` and `termsOfServiceUrl` for the plugin directory. Repo gained `PRIVACY.md` and `CONTRIBUTING.md`.
+- Kit scripts report 0.2.1.
+
 ## 0.2.0 (2026-11-12)
 
 - Kit: `install.mjs` (dry-run by default), `e2e-changed.mjs` + map, Claude Code Stop hook, Playwright templates (setup project, `gotoReady`, config snippet with `repeatEach` from `E2E_REPEAT`, build-id preflight) and Next.js readiness markers + health route.

@@ -4,7 +4,7 @@ description: "Write, review and run pgTAP tests for Row Level Security, grants a
 license: Apache-2.0
 compatibility: Needs the Supabase CLI and a running local Supabase stack (Docker) for `supabase test db`; Node 20+ for the optional scripts. Verified on Supabase CLI 3.1.0 / Postgres 17.
 metadata:
-  version: "0.1.0"
+  version: "0.3.1"
   verified-against: "Supabase CLI 3.1.0, Postgres 17.11, pgTAP 1.3.3 on a local stack (2026-11-12); client-level template not yet run, see references/VERSIONS.md"
 ---
 

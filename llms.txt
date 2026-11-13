@@ -16,4 +16,4 @@ Problems covered: agents re-running or batching test suites with sleeps; e2e tes
 
 ## Install
 - Claude Code: `/plugin marketplace add AndresDiagoM/agent-testing-skills` then `/plugin install <skill>@agent-testing-skills`
-- Other agents: `npx skills add AndresDiagoM/agent-testing-skills --skill <skill>`
+- Other agents: `npx skills@1.7.4 add AndresDiagoM/agent-testing-skills --skill <skill>`

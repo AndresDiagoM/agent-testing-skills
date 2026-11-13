@@ -9,7 +9,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const KIT = dirname(fileURLToPath(import.meta.url));
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
 export const GROUPS = ['changed', 'hook', 'e2e', 'app'];
 
 export const USAGE = `install.mjs ${VERSION}: install the test-gate kit into a repo (dry-run by default).

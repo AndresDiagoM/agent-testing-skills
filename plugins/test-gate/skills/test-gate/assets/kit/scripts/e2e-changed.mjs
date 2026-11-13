@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PORT, checkBuildFreshness, detectPackageManager, expandCommand, formatDuration, loadConfig, pickFreePort, runCommand } from './gate-lib.mjs';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
 export const ALL = 'ALL';
 
 export const USAGE = `e2e-changed.mjs ${VERSION}: run only the e2e specs affected by the current change, repeated.

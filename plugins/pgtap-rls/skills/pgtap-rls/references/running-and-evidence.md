@@ -20,7 +20,7 @@ If the repo has the `test-gate` kit (`scripts/gate.mjs` at the repo root, or `--
 (`--no-gate` forces it; a test cross-checks both). If the kit's own gate already ran `db:test`, do not record it twice.
 
 ## Evidence rules
-- Writes the step `db:test`, `kind: "db"`, into the shared file (schema v2 of `test-gate`, `reportedBy: "pgtap-rls 0.1.0"`).
+- Writes the step `db:test`, `kind: "db"`, into the shared file (schema v2 of `test-gate`, `reportedBy: "pgtap-rls <version>"`).
   Other steps and root fields survive; the same-name step is replaced whole; the write is atomic.
 - `counts`: numbers `passed`, `failed`, `skipped` (the schema's minimum) plus the legacy pgTAP keys `files`, `tests`,
   `result`; the same three also sit in `details.pgtap` with `skipsVisible`. `skipped` is 0 when the output cannot show

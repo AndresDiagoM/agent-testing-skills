@@ -12,7 +12,7 @@ Claude Code:
 
 Other agents ([Agent Skills](https://agentskills.io) standard):
 ```
-npx skills add AndresDiagoM/agent-testing-skills --skill __NAME__
+npx skills@1.7.4 add AndresDiagoM/agent-testing-skills --skill __NAME__
 ```
 
 ## Tested with
