@@ -1,6 +1,6 @@
 # Agent skills for honest, fast testing
 
-[![skills.sh](https://www.skills.sh/b/AndresDiagoM/agent-testing-skills)](https://www.skills.sh/andresdiagom/agent-testing-skills) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![skills.sh](https://www.skills.sh/b/AndresDiagoM/agent-testing-skills)](https://www.skills.sh/andresdiagom/agent-testing-skills) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/AndresDiagoM/agent-testing-skills)
 
 Agent Skills (the open [SKILL.md](https://agentskills.io) format) that make coding agents (Claude Code, Codex, opencode, Antigravity, Cursor) run tests quickly, prove what they ran, and test database security for real. Each skill is also a Claude Code plugin.
 
