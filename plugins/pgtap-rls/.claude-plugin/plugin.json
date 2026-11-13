@@ -9,5 +9,9 @@
   },
   "homepage": "https://github.com/AndresDiagoM/agent-testing-skills/tree/main/plugins/pgtap-rls",
   "repository": "https://github.com/AndresDiagoM/agent-testing-skills",
+  "documentationUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/plugins/pgtap-rls/README.md",
+  "supportUrl": "https://github.com/AndresDiagoM/agent-testing-skills/issues",
+  "privacyPolicyUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/PRIVACY.md",
+  "termsOfServiceUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/LICENSE",
   "keywords": ["pgtap", "postgres", "supabase", "row-level-security", "rls", "sql", "testing", "agent-skill"]
 }

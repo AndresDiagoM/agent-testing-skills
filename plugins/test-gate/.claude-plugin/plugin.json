@@ -9,5 +9,9 @@
   },
   "homepage": "https://github.com/AndresDiagoM/agent-testing-skills/tree/main/plugins/test-gate",
   "repository": "https://github.com/AndresDiagoM/agent-testing-skills",
+  "documentationUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/plugins/test-gate/README.md",
+  "supportUrl": "https://github.com/AndresDiagoM/agent-testing-skills/issues",
+  "privacyPolicyUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/PRIVACY.md",
+  "termsOfServiceUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/LICENSE",
   "keywords": ["testing", "e2e", "playwright", "cypress", "vitest", "jest", "quality-gate", "ci", "agent-skill"]
 }
