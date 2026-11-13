@@ -25,8 +25,9 @@ A skill that does not load when it should, or loads when it should not, is a bug
    node --test plugins/test-gate/skills/test-gate/assets/kit/scripts/*.test.mjs plugins/test-gate/scripts/*.test.mjs   # test-gate
    node --test plugins/pgtap-rls/skills/pgtap-rls/scripts/test/*.test.mjs                                             # pgtap-rls
    ```
-5. If behaviour changes, add or update an eval case in `plugins/<skill>/evals/` and run `claude plugin eval plugins/<skill>`.
-6. Add a line to the skill's `CHANGELOG.md`. Maintainers bump the version and tag releases (`<skill>--vX.Y.Z`).
+5. Rebuild the Anthropic directory edition and commit it: `node scripts/build-directory.mjs`, then `node scripts/build-directory.mjs --check` (it fails if `directory/` is stale or holds a file type the directory refuses). Never edit `directory/` by hand.
+6. If behaviour changes, add or update an eval case in `plugins/<skill>/evals/` and run `claude plugin eval plugins/<skill>`.
+7. Add a line to the skill's `CHANGELOG.md`. Maintainers bump the version and tag releases (`<skill>--vX.Y.Z`).
 
 ## Adding a skill
 

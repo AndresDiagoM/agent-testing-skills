@@ -112,6 +112,12 @@ node scripts/new-skill.mjs mi-skill "Qué hace y cuándo usarla"
 
 ### Enviar un plugin al directorio de Anthropic (hecho con `test-gate` y `pgtap-rls`, 2026-11-12)
 
+**Edición para el directorio (obligatoria sin organización verificada).** El 2026-11-12 el directorio rechazó las dos primeras versiones (`LOCAL_CODE_FILE_TYPE`): a una cuenta no verificada solo le acepta Markdown, texto, JSON, YAML e imágenes PNG/JPEG/GIF/WebP/ICO, sin `#!` al inicio, en UTF-8 y sin bytes NUL. No hay forma de pedir la verificación. Por eso:
+- `plugins/mi-skill/` sigue siendo la edición completa (scripts, plantillas, evals) para nuestro marketplace y `npx skills`.
+- `node scripts/build-directory.mjs` genera `directory/mi-skill/`: `SKILL.md` (con una nota al inicio), referencias, assets JSON/Markdown, las plantillas de código convertidas en `<archivo>.md` con el código en un bloque, README con enlaces absolutos a la edición completa y `plugin.json` + ícono. Los scripts ejecutables no se incluyen: la nota del `SKILL.md` dice dónde están y que el agente nunca los descarga ni ejecuta sin permiso del usuario.
+- `node scripts/build-directory.mjs --check` falla si `directory/` quedó desactualizado o si contiene un archivo que el directorio rechazaría. Correrlo antes de cada commit que toque `plugins/`, y commitear `directory/` regenerado.
+- Para agregar una skill nueva al generador, añadirla a `PLUGINS` y, si tiene herramientas ejecutables, sus carpetas a `EXCLUDED_DIRS`.
+
 **Antes de abrir el portal:**
 - `plugin.json` con los campos del listado (la plantilla ya los trae): `displayName`, `description`, `homepage`, `repository`, `keywords`, `documentationUrl`, `supportUrl` (issues), `privacyPolicyUrl` (`PRIVACY.md` de la raíz), `termsOfServiceUrl` (`LICENSE`).
 - `.claude-plugin/icon.png` revisado a tamaño real: el portal lo toma la primera vez.
@@ -123,20 +129,21 @@ node scripts/new-skill.mjs mi-skill "Qué hace y cuándo usarla"
 
 | Paso | Qué poner | Notas |
 |---|---|---|
-| 1 Source | Repository `AndresDiagoM/agent-testing-skills`; Plugin path `plugins/mi-skill`; Branch `main` → Validate | Si se valida la raíz, sale "This folder is a marketplace, not one plugin": hay que elegir la carpeta. Comprobar que el commit mostrado (`main @ <sha>`) es el último; si no, recargar |
+| 1 Source | Repository `AndresDiagoM/agent-testing-skills`; Plugin path `directory/mi-skill` (la edición para el directorio, no `plugins/`); Branch `main` → Validate | Si se valida la raíz, sale "This folder is a marketplace, not one plugin": hay que elegir la carpeta. Comprobar que el commit mostrado (`main @ <sha>`) es el último; si no, recargar |
 | 2 Listing details | Se lee de `plugin.json` y del README; para cambiar algo se edita el repo y se revalida | Superficies: Claude Code siempre; Cowork solo si se probó; Claude apps (web/móvil) **no** para skills que necesitan terminal y repo local |
 | 3 Data handling | Datos personales: No · Envía datos a otro servicio: No · Retención: Not retained · Menores de 18: No | Válido mientras la skill y sus scripts no hagan llamadas de red. Las plantillas que leen credenciales de prueba del entorno del usuario no cuentan como datos personales |
 | 4 Compliance | Correo de contacto (privado) y 4 confirmaciones | Las confirma el usuario después de leer los Directory Terms y la Directory Policy; el agente no las marca por él |
 | 5 Review and submit | Auto-publish **apagado** en la primera versión; "Scheduled check only" (cada ~6 h) o webhook de GitHub (necesita guardar un secreto en el repo) | Con auto-publish apagado, cada push a `main` crea una versión candidata que el usuario publica a mano |
 
-**Avisos que salen y qué significan** (ninguno bloqueó el envío):
+**Avisos que salen y qué significan:**
 
 | Aviso | Causa en nuestro repo | Acción |
 |---|---|---|
 | `UNKNOWN_KEY` en `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, `termsOfServiceUrl` | Claude Code no lee esos campos; solo el directorio | Ninguna: el portal dice "No action needed". Quitarlos deja el listado en "Not set" |
 | README "download-and-execute shell pattern" | `npx skills add …` | Fijar versión (`npx skills@1.7.4`); el aviso puede quedar, es informativo |
 | "Ask the user for the value through a userConfig option (sensitive: true)" | Plantillas que leen contraseñas de prueba de variables de entorno | Ninguna: el plugin no ejecuta esas plantillas; explicarlo en notas si hay campo |
-| Scripts o archivos fuera de los tipos permitidos | `.mjs`, `.ts`, `.sql` del kit y fixtures | Hoy no se rechaza; más adelante solo organizaciones verificadas. Plan B: sacar el kit del plugin y dejarlo solo en GitHub |
+| `LOCAL_CODE_FILE_TYPE`: "Directory policy refused this version" | `.mjs`, `.ts`, `.sql`, `.sh` y fixtures dentro de `plugins/mi-skill` | **Sí bloquea** (desde el 2026-11-12). Enviar `directory/mi-skill`, generado con `build-directory.mjs` |
+| `MCP_FORWARDS_CREDENTIAL_ENV` | Plantillas que leen credenciales de prueba del entorno | Hold para un revisor; no bloquea si la credencial no se envía a ningún lado |
 | Claves de frontmatter fuera de la lista | `compatibility`, `metadata` del estándar Agent Skills | Hoy no se rechaza; si se exige, quitarlas del `SKILL.md` (se pierde algo de portabilidad) |
 | `icon.png` "let through without being read as code" | El ícono | Ninguna |
 

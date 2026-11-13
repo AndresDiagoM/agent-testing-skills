@@ -1,0 +1,103 @@
+# Template: `client-rls.test.ts`
+
+Code template shipped as Markdown in the directory edition (full edition: `assets/client-rls.test.ts.tmpl`).
+Copy the code below into the user's repository as `client-rls.test.ts` and adapt it as the references say.
+The plugin never runs it.
+
+```ts
+// OPTIONAL client-level RLS test (Vitest + @supabase/supabase-js). Verified once against a local stack (see VERSIONS.md).
+// Use it for what a rolled-back pgTAP transaction cannot show: real sign-in, PostgREST error shapes, silent updates.
+// Copy to e.g. tests/rls/__TABLE__.client.test.ts and replace __TABLE__, __OWNER_COLUMN__ and __COLUMN__. If the table has other
+// NOT NULL columns without a default, add them to `seedRow` below (the other user's insert must differ only in the owner).
+// Environment (names only; values come from `supabase status` or your env file, never from this file):
+//   SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY
+import { randomBytes, randomUUID } from 'node:crypto';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
+const url = process.env.SUPABASE_URL ?? '';
+const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY ?? '';
+const secretKey = process.env.SUPABASE_SECRET_KEY ?? '';
+
+// Guard: this file only ever talks to a loopback (local) stack.
+const host = url ? new URL(url).hostname : '';
+const isLocal = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(host);
+const run = url && publishableKey && secretKey && isLocal ? describe : describe.skip;
+
+const opts = { auth: { persistSession: false, autoRefreshToken: false } };
+const TABLE = '__TABLE__';
+const runId = randomUUID().slice(0, 8); // unique per run: users of different runs never collide and cleanup knows its own
+
+run(`client-level RLS: ${TABLE}`, () => {
+  let admin: SupabaseClient;
+  let owner: SupabaseClient;
+  let other: SupabaseClient;
+  const created: string[] = [];
+  let ownerId = '';
+  let rowId = '';
+
+  // Add the table's other NOT NULL columns here, e.g. { ...base, kind: 'draft' }.
+  const seedRow = (ownerId: string, value: string) => ({ __OWNER_COLUMN__: ownerId, __COLUMN__: value });
+
+  // Credentials are generated at runtime: nothing secret-looking is ever written in this file.
+  async function makeUser(label: string): Promise<{ id: string; client: SupabaseClient }> {
+    const email = `rls-${runId}-${label}@test.local`;
+    const password = randomBytes(18).toString('base64url');
+    const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+    if (error || !data.user) throw new Error(`createUser failed: ${error?.message}`);
+    created.push(data.user.id);
+    const client = createClient(url, publishableKey, opts);
+    const signIn = await client.auth.signInWithPassword({ email, password }); // ONE sign-in per user per file (auth rate limits)
+    if (signIn.error) throw new Error(`sign-in failed: ${signIn.error.message}`);
+    return { id: data.user.id, client };
+  }
+
+  beforeAll(async () => {
+    admin = createClient(url, secretKey, opts);
+    const a = await makeUser('owner');
+    const b = await makeUser('other');
+    owner = a.client;
+    other = b.client;
+    ownerId = a.id;
+    const { data, error } = await admin.from(TABLE).insert(seedRow(ownerId, 'original')).select('id').single();
+    if (error) throw new Error(`seed failed: ${error.message}`);
+    rowId = data.id;
+  });
+
+  afterAll(async () => {
+    if (rowId) await admin.from(TABLE).delete().eq('id', rowId);
+    for (const id of created) await admin.auth.admin.deleteUser(id); // only the users this file created
+  });
+
+  it('owner reads their row (positive control)', async () => {
+    const { data, error } = await owner.from(TABLE).select('id').eq('id', rowId);
+    expect(error).toBeNull();
+    expect(data).toHaveLength(1);
+  });
+
+  it('other user sees an empty list, not an error', async () => {
+    const { data, error } = await other.from(TABLE).select('id').eq('id', rowId);
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
+  });
+
+  it('other user UPDATE returns zero rows and the row is unchanged', async () => {
+    const { data, error } = await other.from(TABLE).update({ __COLUMN__: 'hacked' }).eq('id', rowId).select('id');
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
+    const { data: after } = await admin.from(TABLE).select('__COLUMN__').eq('id', rowId).single();
+    expect(after?.__COLUMN__).toBe('original');
+  });
+
+  it('other user cannot insert a row for the owner (RLS violation)', async () => {
+    const { error } = await other.from(TABLE).insert(seedRow(ownerId, 'x'));
+    expect(error?.code).toBe('42501');
+  });
+
+  it('anon client reads nothing or is refused', async () => {
+    const anon = createClient(url, publishableKey, opts);
+    const { data, error } = await anon.from(TABLE).select('id').eq('id', rowId);
+    expect(error !== null || (data ?? []).length === 0).toBe(true);
+  });
+});
+```
