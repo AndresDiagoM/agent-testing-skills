@@ -74,6 +74,15 @@ node scripts/new-skill.mjs mi-skill "Qué hace y cuándo usarla"
    /plugin install mi-skill@agent-testing-skills
    ```
 6. Probar la instalación real desde GitHub en una sesión limpia, no desde la carpeta local.
+7. README de la skill: la plantilla ya trae las secciones. Salen de comparar los README de las skills más usadas (superpowers, humanizer, addyosmani/agent-skills, vercel-labs y supabase agent-skills; revisado el 2026-11-12). Orden:
+   - badges (skills.sh, licencia, versión);
+   - **antes / después** en las primeras ~20 líneas, con un caso real; sin un número de "después" si no se midió;
+   - **resultados medidos** de las evals: fecha, modelo, versión del plugin evaluada, y los casos sin ganancia;
+   - **Usage** con 4-6 prompts, la invocación (`/mi-skill:mi-skill` si es plugin, `/mi-skill` si es carpeta de skill) y la línea "Not for";
+   - **What you get**: salida real recortada, generada corriendo la skill o sus scripts sobre un fixture;
+   - problemas que resuelve, comparación con otras skills (con commits), Install, **Updating and uninstalling**, **When something goes wrong**, Tested with, Privacy, Contributing/Changelog, License.
+
+   Reglas: solo números que estén en archivos del repo o de las evals; no enlazar `evals/results/` (está en `.gitignore`); `npx skills` siempre con versión fija; no nombrar proyectos privados.
 
 **Puerta 3:** instalada desde GitHub, aparece como `/mi-skill:mi-skill` y se activa con un prompt de la fase 1.
 
@@ -99,7 +108,39 @@ node scripts/new-skill.mjs mi-skill "Qué hace y cuándo usarla"
 - Antes de enviar al directorio: `claude plugin validate ./plugins/mi-skill --profile directory`. Este perfil exige `license` (ya viene en la plantilla) y recomienda un ícono PNG cuadrado (512–2048 px, < 2 MB) en `.claude-plugin/icon.png`. El ícono se toma **solo la primera vez** que se guarda en el portal. El directorio además hace un escaneo de seguridad y una revisión de políticas que el CLI no hace.
 - Los canales **no se sincronizan**: cada subida es una copia que se actualiza aparte.
 - El marketplace `claude-plugins-official` no acepta envíos por el portal.
-- Por verificar antes de usar: los criterios de revisión del directorio y la cabecera `anthropic-version` de `/v1/skills`.
+- Por verificar antes de usar: la cabecera `anthropic-version` de `/v1/skills`.
+
+### Enviar un plugin al directorio de Anthropic (hecho con `test-gate` y `pgtap-rls`, 2026-11-12)
+
+**Antes de abrir el portal:**
+- `plugin.json` con los campos del listado (la plantilla ya los trae): `displayName`, `description`, `homepage`, `repository`, `keywords`, `documentationUrl`, `supportUrl` (issues), `privacyPolicyUrl` (`PRIVACY.md` de la raíz), `termsOfServiceUrl` (`LICENSE`).
+- `.claude-plugin/icon.png` revisado a tamaño real: el portal lo toma la primera vez.
+- README con lo de la fase 3 (punto 7) y `npx skills` con versión fija.
+- `check-skill.mjs --portable`, `--profile directory` y `claude plugin validate . --strict` en verde; commit y push a `main`.
+- La cuenta dueña del listado es una decisión del usuario (personal o de organización); el correo de contacto no va en el repo.
+
+**Portal** (`claude.ai/directory/manage` → Submit new → Plugin bundle). Cada plugin es un envío aparte.
+
+| Paso | Qué poner | Notas |
+|---|---|---|
+| 1 Source | Repository `AndresDiagoM/agent-testing-skills`; Plugin path `plugins/mi-skill`; Branch `main` → Validate | Si se valida la raíz, sale "This folder is a marketplace, not one plugin": hay que elegir la carpeta. Comprobar que el commit mostrado (`main @ <sha>`) es el último; si no, recargar |
+| 2 Listing details | Se lee de `plugin.json` y del README; para cambiar algo se edita el repo y se revalida | Superficies: Claude Code siempre; Cowork solo si se probó; Claude apps (web/móvil) **no** para skills que necesitan terminal y repo local |
+| 3 Data handling | Datos personales: No · Envía datos a otro servicio: No · Retención: Not retained · Menores de 18: No | Válido mientras la skill y sus scripts no hagan llamadas de red. Las plantillas que leen credenciales de prueba del entorno del usuario no cuentan como datos personales |
+| 4 Compliance | Correo de contacto (privado) y 4 confirmaciones | Las confirma el usuario después de leer los Directory Terms y la Directory Policy; el agente no las marca por él |
+| 5 Review and submit | Auto-publish **apagado** en la primera versión; "Scheduled check only" (cada ~6 h) o webhook de GitHub (necesita guardar un secreto en el repo) | Con auto-publish apagado, cada push a `main` crea una versión candidata que el usuario publica a mano |
+
+**Avisos que salen y qué significan** (ninguno bloqueó el envío):
+
+| Aviso | Causa en nuestro repo | Acción |
+|---|---|---|
+| `UNKNOWN_KEY` en `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, `termsOfServiceUrl` | Claude Code no lee esos campos; solo el directorio | Ninguna: el portal dice "No action needed". Quitarlos deja el listado en "Not set" |
+| README "download-and-execute shell pattern" | `npx skills add …` | Fijar versión (`npx skills@1.7.4`); el aviso puede quedar, es informativo |
+| "Ask the user for the value through a userConfig option (sensitive: true)" | Plantillas que leen contraseñas de prueba de variables de entorno | Ninguna: el plugin no ejecuta esas plantillas; explicarlo en notas si hay campo |
+| Scripts o archivos fuera de los tipos permitidos | `.mjs`, `.ts`, `.sql` del kit y fixtures | Hoy no se rechaza; más adelante solo organizaciones verificadas. Plan B: sacar el kit del plugin y dejarlo solo en GitHub |
+| Claves de frontmatter fuera de la lista | `compatibility`, `metadata` del estándar Agent Skills | Hoy no se rechaza; si se exige, quitarlas del `SKILL.md` (se pierde algo de portabilidad) |
+| `icon.png` "let through without being read as code" | El ícono | Ninguna |
+
+**Después de enviar:** el escaneo de seguridad y la revisión llegan al correo de contacto. La primera versión la publica el usuario o el revisor; las siguientes se publican a mano mientras auto-publish esté apagado. Al subir una versión: bump en `plugin.json`, CHANGELOG, tag, y revisar en el portal que la nueva versión pasó el escaneo.
 
 **Puerta 5:** solo para skills sin campos exclusivos de Claude Code; `check-skill.mjs --portable` sin errores.
 

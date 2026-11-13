@@ -1,9 +1,17 @@
 {
   "name": "__NAME__",
+  "displayName": "__TITLE__",
   "description": "__DESCRIPTION__",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "author": {
     "name": "AndresDiagoM"
-  }
+  },
+  "homepage": "https://github.com/AndresDiagoM/agent-testing-skills/tree/main/plugins/__NAME__",
+  "repository": "https://github.com/AndresDiagoM/agent-testing-skills",
+  "documentationUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/plugins/__NAME__/README.md",
+  "supportUrl": "https://github.com/AndresDiagoM/agent-testing-skills/issues",
+  "privacyPolicyUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/PRIVACY.md",
+  "termsOfServiceUrl": "https://github.com/AndresDiagoM/agent-testing-skills/blob/main/LICENSE",
+  "keywords": ["agent-skill"]
 }
