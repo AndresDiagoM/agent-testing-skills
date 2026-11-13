@@ -33,6 +33,8 @@ const EXCLUDED_FILES = ['assets/kit/install.mjs', 'assets/kit/e2e-changed.map.js
 const PLUGIN_FILES = ['.claude-plugin/plugin.json', '.claude-plugin/icon.png', 'CHANGELOG.md'];
 
 const posix = (p) => p.split(path.sep).join('/');
+// Same output on Windows checkouts (CRLF) and on a fresh clone (LF).
+const lf = (text) => text.replace(/\r\n/g, '\n');
 
 function walk(dir, base = dir) {
   const out = [];
@@ -151,7 +153,7 @@ function buildPlugin(name, outRoot) {
       write(`skills/${name}/${rel}`, buf);
       continue;
     }
-    let text = buf.toString('utf8');
+    let text = lf(buf.toString('utf8'));
     if (rel.endsWith('.md')) text = rewrite(text);
     if (rel === 'SKILL.md') {
       const end = text.indexOf('\n---', 4);
@@ -161,10 +163,10 @@ function buildPlugin(name, outRoot) {
     write(`skills/${name}/${rel}`, text);
   }
   for (const rel of converted) {
-    write(`skills/${name}/${rel}.md`, templateToMarkdown(rel, readFileSync(path.join(skillSrc, rel), 'utf8')));
+    write(`skills/${name}/${rel}.md`, templateToMarkdown(rel, lf(readFileSync(path.join(skillSrc, rel), 'utf8'))));
   }
 
-  const readme = readFileSync(path.join(src, 'README.md'), 'utf8');
+  const readme = lf(readFileSync(path.join(src, 'README.md'), 'utf8'));
   const banner = [
     `> **Directory edition** of \`${name}\`, built by \`scripts/build-directory.mjs\` from [\`plugins/${name}\`](${REPO_URL}/tree/main/plugins/${name}).`,
     '> Same skill and references; code templates ship as Markdown, and the optional runnable scripts are only in the full edition.',
