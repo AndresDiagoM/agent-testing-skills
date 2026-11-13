@@ -129,7 +129,7 @@ node scripts/new-skill.mjs mi-skill "Qué hace y cuándo usarla"
 
 | Paso | Qué poner | Notas |
 |---|---|---|
-| 1 Source | Repository `AndresDiagoM/agent-testing-skills`; Plugin path `directory/mi-skill` (la edición para el directorio, no `plugins/`); Branch `main` → Validate | Si se valida la raíz, sale "This folder is a marketplace, not one plugin": hay que elegir la carpeta. Comprobar que el commit mostrado (`main @ <sha>`) es el último; si no, recargar |
+| 1 Source | Repository `AndresDiagoM/agent-testing-skills`; Plugin path `directory/mi-skill` (la edición para el directorio, no `plugins/`); Branch `main` → Validate | El portal lee `marketplace.json`, ofrece las carpetas de `plugins/` y **rellena solo** el campo "Plugin path (optional)" con `plugins/mi-skill`: hay que borrarlo y escribir `directory/mi-skill` a mano antes de validar. Si se valida la raíz sale "This folder is a marketplace, not one plugin". Comprobar el commit mostrado (`main @ <sha>`) y el número de archivos (la edición para el directorio tiene ~20-35; la completa, más de 100) |
 | 2 Listing details | Se lee de `plugin.json` y del README; para cambiar algo se edita el repo y se revalida | Superficies: Claude Code siempre; Cowork solo si se probó; Claude apps (web/móvil) **no** para skills que necesitan terminal y repo local |
 | 3 Data handling | Datos personales: No · Envía datos a otro servicio: No · Retención: Not retained · Menores de 18: No | Válido mientras la skill y sus scripts no hagan llamadas de red. Las plantillas que leen credenciales de prueba del entorno del usuario no cuentan como datos personales |
 | 4 Compliance | Correo de contacto (privado) y 4 confirmaciones | Las confirma el usuario después de leer los Directory Terms y la Directory Policy; el agente no las marca por él |
@@ -141,11 +141,25 @@ node scripts/new-skill.mjs mi-skill "Qué hace y cuándo usarla"
 |---|---|---|
 | `UNKNOWN_KEY` en `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, `termsOfServiceUrl` | Claude Code no lee esos campos; solo el directorio | Ninguna: el portal dice "No action needed". Quitarlos deja el listado en "Not set" |
 | README "download-and-execute shell pattern" | `npx skills add …` | Fijar versión (`npx skills@1.7.4`); el aviso puede quedar, es informativo |
-| "Ask the user for the value through a userConfig option (sensitive: true)" | Plantillas que leen contraseñas de prueba de variables de entorno | Ninguna: el plugin no ejecuta esas plantillas; explicarlo en notas si hay campo |
+| `MCP_FORWARDS_CREDENTIAL_ENV` (hold): "Ask the user for the value through a userConfig option…" o "If this is only an example, change the variable to the fake value YOUR_API_KEY…" | Plantillas que leen credenciales de prueba del entorno del usuario: cuentas de e2e (`test-gate`), claves del Supabase local (`pgtap-rls`) | Dejarlo: la credencial solo va a la app o al Supabase del propio usuario, y un revisor libera la versión. **No** poner `YOUR_API_KEY` ni otro valor literal: va contra nuestra regla de no tener secretos literales, ni falsos |
 | `LOCAL_CODE_FILE_TYPE`: "Directory policy refused this version" | `.mjs`, `.ts`, `.sql`, `.sh` y fixtures dentro de `plugins/mi-skill` | **Sí bloquea** (desde el 2026-11-12). Enviar `directory/mi-skill`, generado con `build-directory.mjs` |
-| `MCP_FORWARDS_CREDENTIAL_ENV` | Plantillas que leen credenciales de prueba del entorno | Hold para un revisor; no bloquea si la credencial no se envía a ningún lado |
+| "This isn't refused yet. Later, the directory will accept scripts… only from Verified organizations" | Se validó `plugins/mi-skill` en vez de `directory/mi-skill` | Corregir el Plugin path y validar de nuevo: con la edición para el directorio este aviso desaparece |
 | Claves de frontmatter fuera de la lista | `compatibility`, `metadata` del estándar Agent Skills | Hoy no se rechaza; si se exige, quitarlas del `SKILL.md` (se pierde algo de portabilidad) |
 | `icon.png` "let through without being read as code" | El ícono | Ninguna |
+
+**Resultado esperado al validar `directory/mi-skill`** (así salió el 2026-11-12, commit `049503f`): "Validation passed: 5 warnings, 1 policy hold"; 25 archivos en `pgtap-rls` y 35 en `test-gate`; los avisos son los 4 `UNKNOWN_KEY`, el de `npx` en el README, el de `icon.png` y el hold de credenciales. Si aparece algo más, revisar antes de enviar.
+
+**Cambiar la carpeta de un envío ya hecho:** no se puede. El botón Edit lleva a Settings, donde solo se cambian la rama o el tag, las superficies, el correo, auto-publish y las actualizaciones ("To use a different repository or path, make a new submission"). Pasos:
+1. En el envío viejo: Settings → Danger zone → **Withdraw**. Si nada se publicó, no se pierde nada, y reenviar el mismo repo y path lo reabre.
+2. Submit new con el path nuevo y las mismas respuestas en los pasos 2 a 5.
+Retirar antes de crear el nuevo, porque los dos envíos tienen el mismo `name`.
+
+**Estados en el portal:** Submitted → Scanning ("Waiting for a first scan", luego "Being scanned now") → Needs changes (con el motivo y los hallazgos en "Needs you") o In review → Live. En "Needs changes" se corrige el repo y se hace push: la siguiente versión se escanea sola (cada ~6 h o con el webhook).
+
+**Historial de nuestro primer envío (2026-11-12):**
+1. Primer envío de `plugins/test-gate` y `plugins/pgtap-rls` (`80613eb`): la validación del formulario pasó, pero el escaneo los dejó en **Needs changes** con `LOCAL_CODE_FILE_TYPE`. El commit siguiente (`003032a`, solo docs) se escaneó como otra versión y también fue rechazado.
+2. Se creó `scripts/build-directory.mjs` y la edición `directory/<name>` (`9d32a80`, `049503f`).
+3. Se retiraron los dos envíos y se enviaron de nuevo con `directory/test-gate` y `directory/pgtap-rls` (`049503f`).
 
 **Después de enviar:** el escaneo de seguridad y la revisión llegan al correo de contacto. La primera versión la publica el usuario o el revisor; las siguientes se publican a mano mientras auto-publish esté apagado. Al subir una versión: bump en `plugin.json`, CHANGELOG, tag, y revisar en el portal que la nueva versión pasó el escaneo.
 
